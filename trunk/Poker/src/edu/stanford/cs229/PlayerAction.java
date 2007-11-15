@@ -1,5 +1,12 @@
 package edu.stanford.cs229;
 
+/**
+ * Represents a player action, which consists of:
+ * - an action (bet, fold, check)
+ * - a bet (if necessary)
+ * @author ago
+ *
+ */
 public class PlayerAction {
 	private final int actionType;
 	private final int bet;

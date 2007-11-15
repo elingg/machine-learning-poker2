@@ -76,9 +76,9 @@ public List<Card> isStraightFlush(){
 	//sort all cards
 	List<Card> tempList= this.isStraight();
 	List<Card> tempList1 = this.isFlush();
-	if(tempList != null && tempList1 !=null)
+	if(tempList != null && tempList1 !=null && tempList.equals(tempList1))
 	{
-		tempList.addAll(tempList1);
+	
 		return tempList;
 	}
 	 return null;
@@ -87,7 +87,7 @@ public List<Card> isStraightFlush(){
 	
 	public List<Card> isFlush(){
 		
-		List<Card> tempList= new ArrayList<Card>();
+		List<Card> tempList=null;
 		
 		this.getSorted();
 		for(int i=1; i<=4; i++)
@@ -95,8 +95,9 @@ public List<Card> isStraightFlush(){
 			List<Card> suiteList= getSuite(i);
 			if(suiteList.size()>=5)
 			{
-				suiteList= suiteList.subList(suiteList.size()-5, suiteList.size()-1);
-				if(tempList == null)
+				suiteList= suiteList.subList(suiteList.size()-5, suiteList.size());
+				
+				if(tempList==null)
 				{
 					tempList=suiteList;
 				}
@@ -107,7 +108,7 @@ public List<Card> isStraightFlush(){
 			}
 			
 		}
-		return null;
+		return tempList;
 	}
 	
 	
@@ -119,13 +120,14 @@ public List<Card> isStraightFlush(){
 		for(int i=allCards.size()-1; i>=4; i--)
 		{
 			
-			if(((allCards.get(i)).getValue() + 1 == (allCards.get(i-1)).getValue()) && ((allCards.get(i-1)).getValue() + 1 == (allCards.get(i-2)).getValue()) && ((allCards.get(i-2)).getValue() + 1 == (allCards.get(i-3)).getValue()) && ((allCards.get(i-3)).getValue() + 1 == (allCards.get(i-4)).getValue()))
+			if(((allCards.get(i)).getValue() - 1 == (allCards.get(i-1)).getValue()) && ((allCards.get(i-1)).getValue() - 1 == (allCards.get(i-2)).getValue()) && ((allCards.get(i-2)).getValue() - 1 == (allCards.get(i-3)).getValue()) && ((allCards.get(i-3)).getValue() - 1 == (allCards.get(i-4)).getValue()))
 			{
-				tempList.add(allCards.get(i));
-				tempList.add(allCards.get(i-1));
-				tempList.add(allCards.get(i-2));
-				tempList.add(allCards.get(i-3));
 				tempList.add(allCards.get(i-4));
+				tempList.add(allCards.get(i-3));
+				tempList.add(allCards.get(i-2));
+				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i));
+				
 				return tempList;
 			}
 				
@@ -141,9 +143,11 @@ public List<Card> isStraightFlush(){
 		//sort all cards
 		List<Card> tempList= this.isPair();
 		List<Card> tempList1 = this.isThreeKind();
-		if(tempList != null && tempList1 !=null)
+		
+		if(tempList != null && tempList1 !=null && !tempList.get(0).equals(tempList1.get(0)))
 		{
 			tempList.addAll(tempList1);
+			Collections.sort(tempList);
 			return tempList;
 		}
 	
@@ -158,12 +162,12 @@ public List<Card> isStraightFlush(){
 	
 		for(int i=allCards.size()-1; i>=3; i--)
 		{
-			if((allCards.get(i)).equals(allCards.get(i-1)) && (allCards.get(i-1)).equals(allCards.get(i-2)) && (allCards.get(i-2)).equals(allCards.get(i-3)) )
-			{
-				tempList.add(allCards.get(i));
-				tempList.add(allCards.get(i-1));
-				tempList.add(allCards.get(i-2));
+			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue() && allCards.get(i-1).getValue() ==allCards.get(i-2).getValue()  && allCards.get(i-2).getValue() ==allCards.get(i-3).getValue() )
+				{
 				tempList.add(allCards.get(i-3));
+				tempList.add(allCards.get(i-2));
+				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i));
 				return tempList;
 			}
 				
@@ -180,11 +184,11 @@ public List<Card> isStraightFlush(){
 		
 		for(int i=allCards.size()-1; i>=2; i--)
 		{
-			if((allCards.get(i)).equals(allCards.get(i-1)) && (allCards.get(i-1)).equals(allCards.get(i-2)) )
+			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue() && allCards.get(i-1).getValue() ==allCards.get(i-2).getValue() )
 			{
-				tempList.add(allCards.get(i));
-				tempList.add(allCards.get(i-1));
 				tempList.add(allCards.get(i-2));
+				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i));
 				return tempList;
 			}
 				
@@ -202,13 +206,15 @@ public List<Card> isStraightFlush(){
 		
 		for(int i=allCards.size()-1; i>=1; i--)
 		{
-			if(allCards.get(i).equals(allCards.get(i-1)))
+			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue())
 			{
-				tempList.add(allCards.get(i));
 				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i));
+				
 				numPairs++;
 				if(numPairs==2)
 				{
+					Collections.sort(tempList);
 					return tempList;
 				}
 			}
@@ -226,10 +232,12 @@ public List<Card> isStraightFlush(){
 		
 		for(int i=allCards.size()-1; i>=1; i--)
 		{
-			if(allCards.get(i).equals(allCards.get(i-1)))
+			
+			if(allCards.get(i).getValue() == allCards.get(i-1).getValue())
 			{
-				tempList.add(allCards.get(i));
 				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i));
+				
 				return tempList;
 			}
 		}

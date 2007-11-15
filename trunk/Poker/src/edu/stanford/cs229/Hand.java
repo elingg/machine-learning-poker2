@@ -33,17 +33,22 @@ public class Hand {
 	public List<Card> getAllCards() {
 		return allCards;
 	}
+	
+	/*
 	public void setAllCards(List<Card> allCards) {
 		this.allCards = allCards;
 	}
-
-	/**
-	 * Adds a card
-	 * @param card
-	 */
-	public void addCard(Card card) {
+	*/
+	
+	public void addTableCard(Card card) {
+		tableCards.add(card);
 		allCards.add(card);
 	}
+	
+	public void addPlayerCard(Card card) {
+		playerCards.add(card);
+		allCards.add(card);
+	}	
 	
 	/**
 	 * Returns a list of cards in sorted order

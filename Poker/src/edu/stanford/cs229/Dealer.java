@@ -6,5 +6,7 @@ package edu.stanford.cs229;
  *
  */
 public class Dealer extends AbstractPlayer{
-	
+	public PlayerAction getAction() {
+		return null;
+	}
 }

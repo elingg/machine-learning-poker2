@@ -10,56 +10,90 @@ import java.util.List;
  */
 public class GameState {
 	private final List<Card> tableCards;
+
 	private final Deck deck;
-	
+
+	/**
+	 * Constructor
+	 *
+	 */
 	public GameState() {
 		tableCards = new ArrayList<Card>();
 		deck = new Deck();
 	}
-	
-	public void run() {
+
+	/**
+	 * Runs the game
+	 * @throws ApplicationException
+	 */
+	public void run() throws ApplicationException {
 		Player player = new Player();
 		Dealer dealer = new Dealer();
-		
-	    System.out.println("Starting game!");
-		
+
+		System.out.println("Starting game!");
+
 		//Assign cards to player
-		Card playerCard1 =  deck.drawCard();
-		Card playerCard2 =  deck.drawCard();
-		
-		player.addCard(playerCard1);
-		player.addCard(playerCard2);
-		
-		//Assign cards to player
-		Card dealerCard1 = deck.drawCard();
-		Card dealerCard2 = deck.drawCard();
-		
-		dealer.addCard(dealerCard1);
-		dealer.addCard(dealerCard2);
-		
+		player.addPlayerCard(deck.drawCard());
+		player.addPlayerCard(deck.drawCard());
+
+		//Assign cards to dealer
+		dealer.addPlayerCard(deck.drawCard());
+		dealer.addPlayerCard(deck.drawCard());
+
 		//Assign cards to table
-		Card tableCard1 = deck.drawCard();
-		tableCards.add(tableCard1);
-		System.out.println("Drew card: " + tableCard1);
+		tableCards.add(deck.drawCard());
+		tableCards.add(deck.drawCard());
+		printTableState(tableCards, dealer, player);
 		
+		dealer.getAction();
+		player.getAction();
+
+		tableCards.add(deck.drawCard());
+		printTableState(tableCards, dealer, player);
+		
+		dealer.getAction();
 		player.getAction();
 		
-		Card tableCard2 = deck.drawCard();
-		tableCards.add(tableCard2);
-		System.out.println("Drew card: " + tableCard2);
-				
-		Card tableCard3 = deck.drawCard();
-		tableCards.add(tableCard2);
-		System.out.println("Drew card: " + tableCard2);
+		tableCards.add(deck.drawCard());
+		printTableState(tableCards, dealer, player);
 		
-		Card tableCard4 = deck.drawCard();
-		tableCards.add(tableCard2);
-		System.out.println("Drew card: " + tableCard2);
+		dealer.getAction();
+		player.getAction();
 		
-		Card tableCard5 = deck.drawCard();
-		tableCards.add(tableCard2);
-		System.out.println("Drew card: " + tableCard2);
+		tableCards.add(deck.drawCard());
+		printTableState(tableCards, dealer, player);
+		
+		dealer.getAction();
+		player.getAction();
+		
 		
 	}
 	
+
+	/**
+	 * Prints the cards of all the players
+	 * @param tableCards
+	 * @param dealer
+	 * @param player
+	 */
+	private static void printTableState(List<Card> tableCards, Dealer dealer, Player player) {
+		System.out.println("Table has: " + getCardListString(tableCards));
+		System.out.println("Dealer has: " + dealer.toString());
+		System.out.println("You have: " + player.toString());
+	}
+
+	/**
+	 * Prints out a list of cards
+	 * @param cards
+	 * @return
+	 */
+	private static String getCardListString(List<Card> cards) {
+		String s = "";
+		for (Card c : cards) {
+			s += "[" + c.getValue() + "," + c.getSuite() + "]";
+		}
+		return s;
+	}
+	
+
 }

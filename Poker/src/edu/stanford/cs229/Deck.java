@@ -39,6 +39,7 @@ public class Deck {
 		hand.setPlayerCards(playerCards);
 		hand.setTableCards(tableCards);*/
 		
+		/*
 		Card c= new Card(6,1);
 		Card c1= new Card(2,1);
 		Card c2= new Card(3,1);
@@ -64,7 +65,7 @@ public class Deck {
 		{
 				System.out.println(result.toString());
 		}
-	
+	*/
 			
 	}
 
@@ -105,10 +106,9 @@ public class Deck {
 				duplicateCount++;
 			}
 		}
-		logger.info("Duplicate count: " + duplicateCount);
-		logger.info("Card: " + card);
+		
 		if (duplicateCount >= NUM_DECKS) {
-			logger.info("Found dup");
+			
 			return false;
 		} else {
 			return true;

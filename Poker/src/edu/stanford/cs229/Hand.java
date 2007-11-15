@@ -1,0 +1,241 @@
+package edu.stanford.cs229;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import java.util.List;
+
+public class Hand {
+	private List<Card> playerCards;
+	private List<Card> tableCards;
+	private List<Card> allCards;
+
+	public Hand() {
+		playerCards = new ArrayList<Card>();
+		tableCards = new ArrayList<Card>();
+		allCards = new ArrayList<Card>();
+	}
+
+	
+	public List<Card> getTableCards() {
+		return tableCards;
+	}
+	public void setTableCards(List<Card> tableCards) {
+		this.tableCards = tableCards;
+	}
+	public List<Card> getPlayerCards() {
+		return playerCards;
+	}
+	public void setPlayerCards(List<Card> playerCards) {
+		this.playerCards = playerCards;
+	}
+	
+	public List<Card> getAllCards() {
+		return allCards;
+	}
+	public void setAllCards(List<Card> allCards) {
+		this.allCards = allCards;
+	}
+
+	/**
+	 * Adds a card
+	 * @param card
+	 */
+	public void addCard(Card card) {
+		allCards.add(card);
+	}
+	
+	/**
+	 * Returns a list of cards in sorted order
+	 * @return
+	 */
+	public List<Card> getSorted() {
+		 Collections.sort(allCards);
+		return allCards;
+	}
+	
+	/**
+	 * Gets all cards of a particular suit
+	 * @param i
+	 * @return
+	 */
+	public List<Card> getSuite(int i) {
+		List<Card> newList = new ArrayList<Card>();
+		for(Card card : allCards) {
+			if(card.getSuite() == i) {
+				newList.add(card);
+			}
+		}
+		return newList;
+	}
+	
+
+	
+public List<Card> isStraightFlush(){
+		
+	//sort all cards
+	List<Card> tempList= this.isStraight();
+	List<Card> tempList1 = this.isFlush();
+	if(tempList != null && tempList1 !=null)
+	{
+		tempList.addAll(tempList1);
+		return tempList;
+	}
+	 return null;
+	}
+	
+	
+	public List<Card> isFlush(){
+		
+		List<Card> tempList= new ArrayList<Card>();
+		
+		this.getSorted();
+		for(int i=1; i<=4; i++)
+		{
+			List<Card> suiteList= getSuite(i);
+			if(suiteList.size()>=5)
+			{
+				suiteList= suiteList.subList(suiteList.size()-5, suiteList.size()-1);
+				if(tempList == null)
+				{
+					tempList=suiteList;
+				}
+				else if(suiteList.get(4).getValue() > tempList.get(4).getValue())
+				{
+					tempList=suiteList;
+				}
+			}
+			
+		}
+		return null;
+	}
+	
+	
+	public List<Card> isStraight(){
+		
+		this.getSorted();
+		List<Card> tempList= new ArrayList<Card>();
+		
+		for(int i=allCards.size()-1; i>=4; i--)
+		{
+			
+			if(((allCards.get(i)).getValue() + 1 == (allCards.get(i-1)).getValue()) && ((allCards.get(i-1)).getValue() + 1 == (allCards.get(i-2)).getValue()) && ((allCards.get(i-2)).getValue() + 1 == (allCards.get(i-3)).getValue()) && ((allCards.get(i-3)).getValue() + 1 == (allCards.get(i-4)).getValue()))
+			{
+				tempList.add(allCards.get(i));
+				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i-2));
+				tempList.add(allCards.get(i-3));
+				tempList.add(allCards.get(i-4));
+				return tempList;
+			}
+				
+		}
+		
+		return null;
+		
+	}
+	
+	
+	public List<Card> isFullHouse(){
+		
+		//sort all cards
+		List<Card> tempList= this.isPair();
+		List<Card> tempList1 = this.isThreeKind();
+		if(tempList != null && tempList1 !=null)
+		{
+			tempList.addAll(tempList1);
+			return tempList;
+		}
+	
+		return null;
+		
+	}
+	
+	public List<Card> isFourKind(){
+	
+		this.getSorted();
+		List<Card> tempList= new ArrayList<Card>();
+	
+		for(int i=allCards.size()-1; i>=3; i--)
+		{
+			if((allCards.get(i)).equals(allCards.get(i-1)) && (allCards.get(i-1)).equals(allCards.get(i-2)) && (allCards.get(i-2)).equals(allCards.get(i-3)) )
+			{
+				tempList.add(allCards.get(i));
+				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i-2));
+				tempList.add(allCards.get(i-3));
+				return tempList;
+			}
+				
+		}
+		
+		return null;
+		
+	}
+	
+	public List<Card> isThreeKind(){
+		
+		this.getSorted();
+		List<Card> tempList= new ArrayList<Card>();
+		
+		for(int i=allCards.size()-1; i>=2; i--)
+		{
+			if((allCards.get(i)).equals(allCards.get(i-1)) && (allCards.get(i-1)).equals(allCards.get(i-2)) )
+			{
+				tempList.add(allCards.get(i));
+				tempList.add(allCards.get(i-1));
+				tempList.add(allCards.get(i-2));
+				return tempList;
+			}
+				
+		}
+		
+		return null;
+	}
+	
+	public List<Card> isTwoPair()
+	{
+		int numPairs=0;
+		
+		this.getSorted();
+		List<Card> tempList= new ArrayList<Card>();
+		
+		for(int i=allCards.size()-1; i>=1; i--)
+		{
+			if(allCards.get(i).equals(allCards.get(i-1)))
+			{
+				tempList.add(allCards.get(i));
+				tempList.add(allCards.get(i-1));
+				numPairs++;
+				if(numPairs==2)
+				{
+					return tempList;
+				}
+			}
+		}
+		
+		return null;
+		
+	}
+	
+	public List<Card> isPair(){
+		
+		//sort all cards
+		 this.getSorted();
+		List<Card> tempList= new ArrayList<Card>();
+		
+		for(int i=allCards.size()-1; i>=1; i--)
+		{
+			if(allCards.get(i).equals(allCards.get(i-1)))
+			{
+				tempList.add(allCards.get(i));
+				tempList.add(allCards.get(i-1));
+				return tempList;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+}

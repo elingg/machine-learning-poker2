@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class Deck {
 	private final int NUM_DECKS = 1; // Number of decks
 
-	public final List<Card> cardsDrawn; // History of cards drawn
+	public List<Card> cardsDrawn; // History of cards drawn
 
 	Logger logger = Logger.getLogger("edu.stanford.cs229.Deck");
 
@@ -74,7 +74,7 @@ public class Deck {
 	 * 
 	 */
 	public Deck() {
-		cardsDrawn = new ArrayList<Card>();
+		shuffleDeck();
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class Deck {
 	public Card drawCard() {
 		Card card;
 		do {
-			card = new Card((int) (Math.random() * 12 + 2), (int) Math
+			card = new Card((int) (Math.random() * 13 + 2), (int) Math
 					.floor(Math.random() * 4 + 1));
 
 		} while (!isValid(card));
@@ -108,10 +108,14 @@ public class Deck {
 		}
 		
 		if (duplicateCount >= NUM_DECKS) {
-			
 			return false;
 		} else {
 			return true;
 		}
 	}
+	
+	public void shuffleDeck() {
+		cardsDrawn = new ArrayList<Card>();
+	}
+	
 }

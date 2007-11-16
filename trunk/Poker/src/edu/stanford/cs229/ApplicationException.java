@@ -6,6 +6,10 @@ public class ApplicationException extends Exception{
 	  super();
   }
   
+  public ApplicationException(String s) {
+	  super(s);
+  }
+  
   public ApplicationException(Throwable t) {
 	  super(t);
   }

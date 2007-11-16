@@ -24,7 +24,9 @@ public class Fraction {
 		this.denominator = denominator;
 	}
 	
-	
+	public String toString() {
+		return Float.toString((float) numerator / (float) denominator);
+	}
 	
 	
 }

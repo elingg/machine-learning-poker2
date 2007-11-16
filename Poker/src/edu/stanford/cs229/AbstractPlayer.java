@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  * 
  */
 public abstract class AbstractPlayer {
-	private final Hand hand;
+	protected final Hand hand;
 
 	private int bankroll = 0;
 

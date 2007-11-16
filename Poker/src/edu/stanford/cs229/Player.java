@@ -10,26 +10,36 @@ import java.io.InputStreamReader;
  *
  */
 public class Player extends AbstractPlayer {
-	public PlayerAction getAction() throws ApplicationException {
+
+	public Player(String name) {
+		super(name);
+	}
+	
+	public PlayerAction getAction(GameState state) throws ApplicationException {
 		try {
 			InputStreamReader isr = new InputStreamReader(System.in);
 			BufferedReader stdin = new BufferedReader(isr);
-			System.out.print("Call/Fold/Bet?");
-			String actionType = stdin.readLine();
-			if (actionType.indexOf("c") != -1) {
-				return new PlayerAction(ActionType.CHECK, -1);
-			} else if (actionType.indexOf("b") != -1) {
-				System.out.println("How much?");
-				int bet = Integer.parseInt(stdin.readLine());
-				return new PlayerAction(ActionType.BET, bet);
-			} else if (actionType.indexOf("f") != -1) {
-				return new PlayerAction(ActionType.FOLD, -1);
+			
+			while (true) {
+				System.out.print("(c)heck/(f)old/(b)et?");
+				String actionType = stdin.readLine();
+				if (actionType.indexOf("c") != -1) {
+					return new PlayerAction(ActionType.CHECK, -1);
+				} else if (actionType.indexOf("b") != -1) {
+					/* Uncomment the following to allow players to bet an amount
+					System.out.println("How much?");
+					int bet = Integer.parseInt(stdin.readLine());
+					*/					
+					//For now, we always bet $10
+					int bet = 10;
+					return new PlayerAction(ActionType.BET, bet);
+				} else if (actionType.indexOf("f") != -1) {
+					return new PlayerAction(ActionType.FOLD, -1);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new ApplicationException(e);
 		}
-		//TODO: Clean up logic
-		return null;
 	}
 }

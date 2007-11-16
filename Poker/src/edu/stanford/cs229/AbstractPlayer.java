@@ -19,11 +19,6 @@ public abstract class AbstractPlayer {
 	
 	public static Logger logger = Logger.getLogger("edu.stanford.cs229.AbstractPlayer");
 
-	public AbstractPlayer() {
-		hand = new Hand();
-		name = "";
-	}
-	
 	public AbstractPlayer(String name) {
 		hand = new Hand();
 		this.name = name;
@@ -85,8 +80,9 @@ public abstract class AbstractPlayer {
 		this.pot += pot;
 	}
 	
-	public void clear() {
-		logger.finest("Clearing hand");
+	//TODO: Make this important to call super on.  How do you do that?
+	public void processEndOfGame(int resultState) {
+		logger.info("Clearing hand");
 		hand = new Hand();
 		pot = 0;
 	}

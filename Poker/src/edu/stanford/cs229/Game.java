@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.logging.Logger;
+
+import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
 /**
  * Represents a game
@@ -11,8 +14,12 @@ import java.util.List;
  *
  */
 public class Game {
-
+	private final static boolean INTERACTIVE_MODE = false;
+	private final static int MAX_RUNS = 100000;
+	
 	private final Deck deck;
+	
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
 	
 	public Game() {
 		deck = new Deck();
@@ -25,8 +32,11 @@ public class Game {
 	 */
 	public static void main(String[] args) throws ApplicationException {
 		Game game = new Game();
-		Dealer player1 = new Dealer("Dealer");
-		Player player2 = new Player("Andrew Ng");
+		//Dealer player1 = new Dealer("Dealer");
+		//Player player2 = new Player("Andrew Ng");
+		
+		ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
+		ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
 		game.run(player1, player2);
 	}	
 	
@@ -38,11 +48,17 @@ public class Game {
 	public void run(AbstractPlayer player1, AbstractPlayer player2) throws ApplicationException {
 		GameState state = new GameState();
 		boolean done = false;
-		
+		int numRuns = 0;
 		while (!done) {
-			System.out.println("\nStarting new game!");
-			System.out.println(player1.getName() + " has $" + player1.getBankroll());
-			System.out.println(player2.getName() + " has $" + player2.getBankroll());
+			numRuns++;
+			if(numRuns % 4 == 0) {
+				deck.shuffleDeck();
+			}
+			logger.info("Number of Runs: " + numRuns);
+			
+			logger.info("\nStarting new game!");
+			logger.info(player1.getName() + " has $" + player1.getBankroll());
+			logger.info(player2.getName() + " has $" + player2.getBankroll());
 			boolean shouldContinue = true;
 			
 			// Step 1: "Pre-flop"
@@ -93,26 +109,42 @@ public class Game {
 			Util util = new Util();
 			Hand h = util.findWinner(player1.getHand(), player2.getHand());
 			if (h == null) {
-				System.out.println("TIE!");
+				logger.info("TIE!");
+				
+				player1.processEndOfGame(ResultState.TIE);
+				player2.processEndOfGame(ResultState.TIE);
 			} else if (h.equals(player1.getHand())) {
 				processWinner(player1, player2);
 			} else {
 				processWinner(player2, player1);
 			}
 			
-			InputStreamReader isr = new InputStreamReader(System.in);
-			BufferedReader stdin = new BufferedReader(isr);
-			System.out.print("Player again? (Y/N)");
-			try {
-				String response = stdin.readLine();
-				if((response.indexOf("n") != -1) || (response.indexOf("N") != -1)) {
-					System.out.println("Ending game");
-					break;
-					
+			if (INTERACTIVE_MODE) {
+				InputStreamReader isr = new InputStreamReader(System.in);
+				BufferedReader stdin = new BufferedReader(isr);
+				System.out.print("Player again? (Y/N)");
+				try {
+					String response = stdin.readLine();
+					if ((response.indexOf("n") != -1)
+							|| (response.indexOf("N") != -1)) {
+						logger.info("Ending game");
+						break;
+
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch(IOException e) {
-				e.printStackTrace();
+			} else {
+				
+				if(numRuns > MAX_RUNS) {
+					break;
+				}
 			}
+
+		}
+		
+		if(player1 instanceof ReinforcementLearningPlayer) {
+			((ReinforcementLearningPlayer) player1).debugResults();
 		}
 	}
 	
@@ -129,11 +161,11 @@ public class Game {
 		PlayerAction action = player1.getAction(state);
 		//state.processPlayer1Action(player1, action);
 		if(action.getActionType() == ActionType.FOLD) {
-			System.out.println(player1.getName() + " folds");
+			logger.info(player1.getName() + " folds");
 			processWinner(player2, player1);
 			return false;
 		} else if(action.getActionType() == ActionType.CHECK){
-			System.out.println(player1.getName() + " checks");
+			logger.info(player1.getName() + " checks");
 			return processBettingRound2(player2, player1, state);
 		} else if(action.getActionType() == ActionType.BET) {
 			player1.addPotByBetting(action.getBet());
@@ -155,7 +187,7 @@ public class Game {
 	private boolean processBettingRound2(AbstractPlayer playerA, AbstractPlayer playerB, GameState state) throws ApplicationException {
 		PlayerAction action = playerA.getAction(state);
 		if(action.getActionType() == ActionType.FOLD) {
-			System.out.println(playerA.getName() + " folds");
+			logger.info(playerA.getName() + " folds");
 			processWinner(playerB, playerA);
 			return false;
 		} else if(action.getActionType() == ActionType.CHECK){
@@ -188,12 +220,13 @@ public class Game {
 	 * @param loser
 	 */
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
-		System.out.println(winner.getName() + " wins!");
+		logger.info("Entering processWinner");
+		logger.info(winner.getName() + " wins!");
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
 		
-		winner.clear();
-		loser.clear();
+		winner.processEndOfGame(ResultState.WIN);
+		loser.processEndOfGame(ResultState.LOSE);
 	}
 
 	/**
@@ -203,9 +236,9 @@ public class Game {
 	 * @param player2
 	 */
 	private static void printTableState(AbstractPlayer player1, AbstractPlayer player2) {
-		System.out.println("Table has: " + getCardListString(player2.getTableCards()));
-		System.out.println(player1.getName() + " has: " + player1.toString());
-		System.out.println(player2.getName() + " has: " + player2.toString());
+		logger.info("Table has: " + getCardListString(player2.getTableCards()));
+		logger.info(player1.getName() + " has: " + player1.toString());
+		logger.info(player2.getName() + " has: " + player2.toString());
 	}
 
 	/**

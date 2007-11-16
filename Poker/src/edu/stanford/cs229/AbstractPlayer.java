@@ -47,6 +47,11 @@ public abstract class AbstractPlayer {
 		}
 		return s;
 	}
+	
+	public Hand getHand(){
+		
+		return hand;
+	}
 
 	public abstract PlayerAction getAction() throws ApplicationException;
 }

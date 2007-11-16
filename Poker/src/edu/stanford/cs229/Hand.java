@@ -9,6 +9,8 @@ public class Hand {
 	private List<Card> playerCards;
 	private List<Card> tableCards;
 	private List<Card> allCards;
+	
+	private int value=-1;
 
 	public Hand() {
 		playerCards = new ArrayList<Card>();
@@ -34,11 +36,20 @@ public class Hand {
 		return allCards;
 	}
 	
-	/*
+	
 	public void setAllCards(List<Card> allCards) {
 		this.allCards = allCards;
 	}
-	*/
+	
+	public int getValue()
+	{
+		return value;
+	}
+	
+	public void setValue(int i)
+	{
+		this.value=i;
+	}
 	
 	public void addTableCard(Card card) {
 		tableCards.add(card);
@@ -149,7 +160,7 @@ public List<Card> isStraightFlush(){
 		List<Card> tempList= this.isPair();
 		List<Card> tempList1 = this.isThreeKind();
 		
-		if(tempList != null && tempList1 !=null && !tempList.get(0).equals(tempList1.get(0)))
+		if(tempList != null && tempList1 !=null && !tempList.get(tempList.size()-1).equals(tempList1.get(tempList1.size()-1)))
 		{
 			tempList.addAll(tempList1);
 			Collections.sort(tempList);
@@ -251,4 +262,5 @@ public List<Card> isStraightFlush(){
 	}
 	
 	
+		
 }

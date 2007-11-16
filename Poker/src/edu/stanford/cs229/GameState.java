@@ -41,8 +41,14 @@ public class GameState {
 		dealer.addPlayerCard(deck.drawCard());
 
 		//Assign cards to table
-		tableCards.add(deck.drawCard());
-		tableCards.add(deck.drawCard());
+		Card tcard1=deck.drawCard();
+		Card tcard2=deck.drawCard();
+		tableCards.add(tcard1);
+		tableCards.add(tcard2);
+		player.addTableCard(tcard1);
+		player.addTableCard(tcard2);
+		dealer.addTableCard(tcard1);
+		dealer.addTableCard(tcard2);
 		printTableState(tableCards, dealer, player);
 		
 		dealer.getAction();
@@ -54,18 +60,33 @@ public class GameState {
 		dealer.getAction();
 		player.getAction();
 		
-		tableCards.add(deck.drawCard());
+		Card tcard=deck.drawCard();
+		tableCards.add(tcard);
+		player.addTableCard(tcard);
+		dealer.addTableCard(tcard);
 		printTableState(tableCards, dealer, player);
 		
 		dealer.getAction();
 		player.getAction();
 		
-		tableCards.add(deck.drawCard());
+		tcard=deck.drawCard();
+		tableCards.add(tcard);
+		player.addTableCard(tcard);
+		dealer.addTableCard(tcard);
 		printTableState(tableCards, dealer, player);
 		
 		dealer.getAction();
 		player.getAction();
 		
+		Util util= new Util();
+		Hand h= util.findWinner(player.getHand(), dealer.getHand());
+		if(h==null)
+			System.out.println("TIE!");
+		else if(h.equals(player.getHand()))
+				System.out.println("Player wins!");
+		else
+			System.out.println("Dealer wins!");
+	
 		
 	}
 	

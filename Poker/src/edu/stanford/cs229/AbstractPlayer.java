@@ -1,5 +1,6 @@
 package edu.stanford.cs229;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -10,14 +11,22 @@ import java.util.logging.Logger;
  * 
  */
 public abstract class AbstractPlayer {
-	protected final Hand hand;
 
-	private int bankroll = 0;
-
+	protected Hand hand;
+	private final String name;
+	private int bankroll = 10000;  //initially, everyone is given $10000
+	private int pot = 0;
+	
 	public static Logger logger = Logger.getLogger("edu.stanford.cs229.AbstractPlayer");
 
 	public AbstractPlayer() {
 		hand = new Hand();
+		name = "";
+	}
+	
+	public AbstractPlayer(String name) {
+		hand = new Hand();
+		this.name = name;
 	}
 
 	public void addTableCard(Card card) {
@@ -49,9 +58,36 @@ public abstract class AbstractPlayer {
 	}
 	
 	public Hand getHand(){
-		
 		return hand;
 	}
 
-	public abstract PlayerAction getAction() throws ApplicationException;
+	public abstract PlayerAction getAction(GameState state) throws ApplicationException;
+	
+	public List<Card> getTableCards() {
+		return hand.getTableCards();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getPot() {
+		return pot;
+	}
+
+	public void addPotByBetting(int pot) {
+		System.out.println(name + " bets $" + pot);
+		this.pot += pot;
+	}
+	
+	public void addPotByChecking(int pot) {
+		System.out.println(name + " checks $" + pot);
+		this.pot += pot;
+	}
+	
+	public void clear() {
+		logger.finest("Clearing hand");
+		hand = new Hand();
+		pot = 0;
+	}
 }

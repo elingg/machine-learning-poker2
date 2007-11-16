@@ -79,23 +79,10 @@ public class Util {
 	}
 	
 	public Hand findWinner(Hand hand1, Hand hand2)
-	{
-
-		findBestCards(hand1);
-		findBestCards(hand2);
-		int hand1val;
-		int hand2val;
+	{	
+		int hand1val=computeValue(hand1);
+		int hand2val=computeValue(hand2);
 		
-		if(hand1.getValue()==-1 && hand2.getValue()==-1)
-		{
-			hand1val=findHighCardValue(hand1.getAllCards());
-			hand2val=findHighCardValue(hand2.getAllCards());
-		}
-		else
-		{
-			hand1val= hand1.getValue() + findHighCardValue(findBestCards(hand1));
-			hand2val= hand2.getValue() + findHighCardValue(findBestCards(hand2));
-		}
 		if(hand1val > hand2val)
 			return hand1;
 		else if(hand2val > hand1val)
@@ -104,5 +91,21 @@ public class Util {
 			return null;
 		
 	}
+	
+	public int computeValue(Hand hand)
+	{
+		findBestCards(hand);
+		int handval;
+		
+		if(hand.getValue()==-1)
+		{
+			handval=findHighCardValue(hand.getAllCards());
+		}
+		else
+			handval=hand.getValue() + findHighCardValue(findBestCards(hand));
+		return handval;
+	}
+	
+	
   
 }

@@ -85,7 +85,7 @@ public class Deck {
 	public Card drawCard() {
 		Card card;
 		do {
-			card = new Card((int) (Math.random() * 13 + 1), (int) Math
+			card = new Card((int) (Math.random() * 12 + 2), (int) Math
 					.floor(Math.random() * 4 + 1));
 
 		} while (!isValid(card));

@@ -9,7 +9,7 @@ The player must play optimally (with the given information) in 1 on 1 poker game
 
 = Instructions =
 
-Import -> Select -> Checkout projects from SVN
-Select machine learning
-Select poker folder
-Make src as source
+  * Import -> Select -> Checkout projects from SVN
+  * Select machine learning
+  * Select poker folder
+  * Make src as source

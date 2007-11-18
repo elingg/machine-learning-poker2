@@ -1,5 +1,10 @@
 package edu.stanford.cs229;
 
+/***
+ * Represents an "activity record" for a player
+ * @author ago
+ *
+ */
 public class PlayerActvityRecord {
 	private final int playerId;
 	private final String name;

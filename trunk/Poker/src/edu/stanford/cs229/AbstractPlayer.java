@@ -1,7 +1,6 @@
 package edu.stanford.cs229;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**

@@ -11,11 +11,13 @@ import java.util.List;
 public class GameState {
 
 	private final List<AbstractPlayer> players;
+	private final List<PlayerActionRecord> playerActionRecords;
 	/**
 	 * Constructor
 	 *
 	 */
 	public GameState(List<AbstractPlayer> players) {
+		playerActionRecords = new ArrayList<PlayerActionRecord>();
 		this.players = players;
 	}
 	
@@ -26,4 +28,23 @@ public class GameState {
 		}
 		return totalPot;
 	}
+	
+	public AbstractPlayer getOpponent(String name) {
+		for(AbstractPlayer player : players) {
+			if(player.getName().equals(Constants.WEBAPP_OPPONENT_NAME)) {
+				return player;
+			}
+		}
+		return null;
+	}
+	
+	public void addPlayerActionRecord(PlayerActionRecord record) {
+		playerActionRecords.add(record);
+	}
+
+	public List<PlayerActionRecord> getPlayerActionRecords() {
+		return playerActionRecords;
+	}
+	
+	
 }

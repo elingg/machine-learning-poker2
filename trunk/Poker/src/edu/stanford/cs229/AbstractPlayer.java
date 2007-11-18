@@ -15,7 +15,7 @@ public abstract class AbstractPlayer implements Serializable {
 	public static Logger logger = Logger
 			.getLogger("edu.stanford.cs229.AbstractPlayer");
 
-	private final String name;
+	protected final String name;
 
 	protected Hand hand;
 
@@ -45,8 +45,8 @@ public abstract class AbstractPlayer implements Serializable {
 		this.pot += pot;
 	}
 
-	public void addPotByChecking(int pot) {
-		logger.fine(name + " checks $" + pot);
+	public void addPotByCalling(int pot) {
+		logger.fine(name + " calls $" + pot);
 		this.pot += pot;
 	}
 
@@ -60,10 +60,6 @@ public abstract class AbstractPlayer implements Serializable {
 
 	public void adjustBankroll(int i) {
 		bankroll += i;
-	}
-
-	public List<Card> getTableCards() {
-		return hand.getTableCards();
 	}
 
 	public void addTableCard(Card card) {

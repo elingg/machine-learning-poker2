@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 /**
  * Represents a human player that will be playing through the Java console
  * @author ago
- *
+ * TODO: Rename to HumanPlayer.java
  */
 public class Player extends AbstractPlayer {
 
@@ -41,5 +41,22 @@ public class Player extends AbstractPlayer {
 			e.printStackTrace();
 			throw new ApplicationException(e);
 		}
+	}
+	
+	public static boolean isDone() {
+		InputStreamReader isr = new InputStreamReader(System.in);
+		BufferedReader stdin = new BufferedReader(isr);
+		System.out.print("Player again? (Y/N)");
+		try {
+			String response = stdin.readLine();
+			if ((response.indexOf("n") != -1)
+					|| (response.indexOf("N") != -1)) {
+				logger.fine("Ending game");
+				return true;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

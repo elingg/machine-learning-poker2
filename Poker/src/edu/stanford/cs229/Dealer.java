@@ -1,9 +1,9 @@
 package edu.stanford.cs229;
 
 /**
- * Represents a dealer
+ * Represents a random player
  * @author ago
- *
+ * TODO: Rename to RandomPlayer
  */
 public class Dealer extends AbstractPlayer{
 	public Dealer(String name) {

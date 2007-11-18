@@ -1,11 +1,10 @@
 package edu.stanford.cs229;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import java.util.List;
-
-public class Hand {
+public class Hand implements Serializable {
 	private List<Card> playerCards;
 	private List<Card> tableCards;
 	private List<Card> allCards;
@@ -78,7 +77,7 @@ public class Hand {
 	public List<Card> getSuite(int i) {
 		List<Card> newList = new ArrayList<Card>();
 		for(Card card : allCards) {
-			if(card.getSuite() == i) {
+			if(card.getSuit() == i) {
 				newList.add(card);
 			}
 		}
@@ -260,7 +259,4 @@ public List<Card> isStraightFlush(){
 		
 		return null;
 	}
-	
-	
-		
 }

@@ -10,17 +10,18 @@ public class Util {
 		
 	}
 	
-	int straightflush=800;
-	int flush=700;
-	int straight=600;
-	int fourkind=500;
-	int fullhouse=400;
-	int threekind=300;
-	int twopair=200;
-	int pair=100;
+	
+	static final int straightflush=800;
+	static final int fourkind=700;
+	static final int fullhouse=600;
+	static final int straight=500;
+	static final int flush=400;
+	static final int threekind=300;
+	static final int twopair=200;
+	static final int pair=100;
 	
 
-	public int findHighCardValue(List<Card> cardList)
+	public static int findHighCardValue(List<Card> cardList)
 	{
 		
 		
@@ -33,7 +34,7 @@ public class Util {
 		return -1;
 	}
 	
-	public List<Card> findBestCards(Hand hand)
+	public static List<Card> findBestCards(Hand hand)
 	{
 		if(hand.isStraightFlush()!=null)
 		{
@@ -78,7 +79,7 @@ public class Util {
 		return null;
 	}
 	
-	public Hand findWinner(Hand hand1, Hand hand2)
+	public static Hand findWinner(Hand hand1, Hand hand2)
 	{	
 		int hand1val=computeValue(hand1);
 		int hand2val=computeValue(hand2);
@@ -92,7 +93,7 @@ public class Util {
 		
 	}
 	
-	public int computeValue(Hand hand)
+	public static int computeValue(Hand hand)
 	{
 		findBestCards(hand);
 		int handval;

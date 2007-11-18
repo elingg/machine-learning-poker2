@@ -33,6 +33,22 @@ public class Hand implements Serializable {
 	public void setTableCards(List<Card> tableCards) {
 		this.tableCards = tableCards;
 	}
+	
+	/**
+	 * Shows the table cards as html
+	 * @return
+	 */
+	public String getTableCardsAsHtml() {
+		String s = "";
+		for (Card card : tableCards) {
+			s += card.toHtmlString();
+		}
+		for (int i = 0; i < (5 - tableCards.size()); i++) {
+			s += Card.getTableCardPlaceHolderAsHtml();
+		}
+		return s;
+	}	
+	
 
 	public List<Card> getPlayerCards() {
 		return playerCards;
@@ -41,6 +57,18 @@ public class Hand implements Serializable {
 	public void setPlayerCards(List<Card> playerCards) {
 		this.playerCards = playerCards;
 	}
+	
+	/**
+	 * Shows the table cards as html
+	 * @return
+	 */
+	public String getPlayerCardsAsHtml() {
+		String s = "";
+		for (Card card : playerCards) {
+			s += card.toHtmlString();
+		}
+		return s;
+	}	
 
 	public List<Card> getAllCards() {
 		return allCards;

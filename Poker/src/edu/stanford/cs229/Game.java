@@ -1,8 +1,15 @@
 package edu.stanford.cs229;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -38,6 +45,11 @@ public class Game {
 		
 		ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
 		ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
+		
+		//ReinforcementLearningPlayer player1 = deserializePlayer("Alec");
+		//ReinforcementLearningPlayer player2 = deserializePlayer("Elizabeth");
+		logger.info(player1.getName() + player1.getBankroll());
+		logger.info(player2.getName() + player2.getBankroll());
 		game.run(player1, player2);
 	}	
 	
@@ -64,6 +76,10 @@ public class Game {
 			logger.fine(player1.getName() + " has $" + player1.getBankroll());
 			logger.fine(player2.getName() + " has $" + player2.getBankroll());
 			boolean shouldContinue = true;
+
+			//Small blind and big blind
+			player1.getBlind(5);
+			player2.getBlind(5);
 			
 			// Step 1: "Pre-flop"
 			player1.addPlayerCard(deck.drawCard());
@@ -150,6 +166,12 @@ public class Game {
 		if(player1 instanceof ReinforcementLearningPlayer) {
 			((ReinforcementLearningPlayer) player1).debugResults();
 		}
+		
+		for(AbstractPlayer player : players) {
+			logger.info(player.getName() + " had " + player.getBankroll());			
+		}
+		
+		serializePlayers(players);		
 	}
 	
 	/**
@@ -256,5 +278,37 @@ public class Game {
 			s += "[" + c.getValue() + "," + c.getSuite() + "]";
 		}
 		return s;
+	}
+	
+	private static void serializePlayers(List<AbstractPlayer> players) throws ApplicationException {
+		try {
+			for (AbstractPlayer player : players) {
+				ObjectOutputStream os = new ObjectOutputStream(
+						new FileOutputStream(player.getName()));
+				os.writeObject(player);
+				os.close();
+			}
+		} catch (IOException e) {
+			throw new ApplicationException(e);
+		}
+	}
+	
+	private static ReinforcementLearningPlayer deserializePlayer(String name) throws ApplicationException{
+		ObjectInput input = null;
+		try {
+			
+		
+	      InputStream file = new FileInputStream(name);
+	      InputStream buffer = new BufferedInputStream( file );
+	      input = new ObjectInputStream ( buffer );
+	      //deserialize the List
+	      ReinforcementLearningPlayer player = (ReinforcementLearningPlayer) input.readObject();
+	      return player;
+		} catch(IOException e) {
+			throw new ApplicationException(e);
+		} catch(ClassNotFoundException e) {
+			throw new ApplicationException(e);
+		}
+		
 	}
 }

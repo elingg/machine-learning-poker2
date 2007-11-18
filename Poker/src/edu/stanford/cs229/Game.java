@@ -1,12 +1,10 @@
 package edu.stanford.cs229;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,7 +24,7 @@ public class Game {
 	
 	private final static boolean INTERACTIVE_MODE = false;
 	private final static int MAX_RUNS = 10;
-	private final static boolean RESTORE_PLAYERS = true;
+	private final static boolean RESTORE_PLAYERS = false;
 	
 	private final Deck deck;
 	
@@ -40,6 +38,10 @@ public class Game {
 	 * @throws ApplicationException
 	 */
 	public static void main(String[] args) throws ApplicationException {
+		//Set up the logging config
+		//TODO: The following doesn't work.
+		System.setProperty("java.util.logging.config.file", "logging.properties");
+		
 		Game game = new Game();
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
@@ -295,7 +297,7 @@ public class Game {
 	 * @return
 	 * @throws ApplicationException
 	 */
-	private static ReinforcementLearningPlayer deserializePlayer(String name) throws ApplicationException{
+	private static ReinforcementLearningPlayer deserializePlayer(String name) throws ApplicationException {
 		ObjectInput input = null;
 		try {
 	      InputStream file = new FileInputStream(name);
@@ -308,7 +310,6 @@ public class Game {
 			throw new ApplicationException(e);
 		} catch(ClassNotFoundException e) {
 			throw new ApplicationException(e);
-		}
-		
+		}		
 	}
 }

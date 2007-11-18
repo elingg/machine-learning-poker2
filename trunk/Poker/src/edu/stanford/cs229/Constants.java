@@ -10,5 +10,8 @@ public class Constants {
 	public static String BET_RAISE_LABEL = "Bet/Raise";
 	public static String FOLD_LABEL = "Fold";
 	
-	public static String WEBAPP_OPPONENT_NAME = "Andrew Ng";
+	public static String YES = "yes";
+	public static String NO = "no";
+	
+	public static String WEBAPP_OPPONENT_NAME = "Computer";
 }

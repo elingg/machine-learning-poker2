@@ -10,6 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
@@ -31,7 +33,6 @@ public class Game extends Thread {
 	//Number of games to be played
 	private final static int MAX_RUNS = 10000000;
 	
-	
 	private int numRuns = 0;
 	private final Deck deck;
 	private List<AbstractPlayer> players;
@@ -40,7 +41,9 @@ public class Game extends Thread {
 	public Game(List<AbstractPlayer> players) {
 		this.deck = new Deck();
 		this.players = players;
-	}
+	}	
+
+
 	
 	/**
 	 * Main entrypoint into the game
@@ -167,12 +170,14 @@ public class Game extends Thread {
 
 			}
 
+			
+			logger.info("End of game results");
 			if (player1 instanceof ReinforcementLearningPlayer) {
 				((ReinforcementLearningPlayer) player1).debugResults();
 			}
 
 			for (AbstractPlayer player : players) {
-				logger.info(player.getName() + " had " + player.getBankroll());
+				logger.info(player.getName() + " : $" + player.getBankroll());
 			}
 
 			serializePlayers(players);
@@ -191,7 +196,10 @@ public class Game extends Thread {
 	 * @throws ApplicationException
 	 */
 	private boolean processBettingRound(AbstractPlayer player1, AbstractPlayer player2, int phase, boolean isLastPerson) throws ApplicationException {
-		printTableState(player1, player2);
+		if(!isLastPerson) {
+			printTableState(player1, player2);
+		}
+		
 		PlayerAction action = player1.getAction(gameState);
 		
 		//TODO: Fill details in later
@@ -202,14 +210,15 @@ public class Game extends Thread {
 			processWinner(player2, player1);
 			return false;
 		} else if(action.getActionType() == ActionType.CHECK_OR_CALL){
-			if(!isLastPerson) {
-				logger.fine(player1.getName() + " checks");
+			logger.fine(player1.getName() + " checks");
+			if(!isLastPerson) {				
 				return processBettingRound(player2, player1, phase, true);
 			} else {
 				matchBetIfNecessary(player1, player2);
 				return true;
 			}
 		} else if(action.getActionType() == ActionType.BET_OR_RAISE) {
+			logger.fine(player1.getName() + " bets");
 			if(isLastPerson) {
 				matchBetIfNecessary(player1, player2);
 			}

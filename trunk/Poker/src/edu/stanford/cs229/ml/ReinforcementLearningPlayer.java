@@ -28,7 +28,6 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 	
 	private int numRounds;
 	
-	private Util util;
 	
 	public ReinforcementLearningPlayer(String name)
 	{
@@ -46,11 +45,10 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 		initializeValues(sixCardState);
 		initializeValues(sevenCardState);
 		numRounds=0;
-		util=new Util();
 		
 	}
 	
-	private void initializeValues(Hashtable ht)
+	private void initializeValues(Hashtable<Integer,Fraction> ht)
 	{
 		for(int i=0; i<=800; i=i+100)
 		{
@@ -67,7 +65,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 		super.addPlayerCard(card);
 		if(hand.getPlayerCards().size()==2)
 		{
-			initialKey=util.computeValue(hand);
+			initialKey=Util.computeValue(hand);
 		}
 	}
 	
@@ -76,15 +74,15 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 		super.addTableCard(card);
 		if(hand.getTableCards().size()==3)
 		{
-			fiveCardKey=util.computeValue(hand);
+			fiveCardKey=Util.computeValue(hand);
 		}
 		else if (hand.getTableCards().size()==4)
 		{
-			sixCardKey=util.computeValue(hand);
+			sixCardKey=Util.computeValue(hand);
 		}
 		else if(hand.getTableCards().size()==5)
 		{
-			sevenCardKey=util.computeValue(hand);
+			sevenCardKey=Util.computeValue(hand);
 			
 		}
 	}
@@ -146,10 +144,10 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 		
 	}
 	
-	public PlayerAction getActionAfterNumCards(Hashtable ht)
+	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht)
 	{
-		float exp=findExpectedValue(util.computeValue(this.hand),ht, this.getPot());
-		float expbet= findExpectedValue(util.computeValue(this.hand),ht, this.getPot()+10);
+		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot());
+		float expbet= findExpectedValue(Util.computeValue(this.hand), ht, this.getPot()+10);
 		float ev= Math.max(exp, expbet);
 		if(ev<0 && numRounds>100)
 			return new PlayerAction(ActionType.FOLD, 0);

@@ -24,12 +24,13 @@ public class Game extends Thread {
 	
 	//Interactive mode
 	private final static boolean INTERACTIVE_MODE = false;
+
+	//Load the player from disk?
+	private final static boolean RESTORE_PLAYERS = false;  
 	
 	//Number of games to be played
 	private final static int MAX_RUNS = 10000000;
 	
-	//Load the player from disk?
-	private final static boolean RESTORE_PLAYERS = false;  
 	
 	private int numRuns = 0;
 	private final Deck deck;
@@ -159,14 +160,9 @@ public class Game extends Thread {
 					processWinner(player2, player1);
 				}
 
-				if (INTERACTIVE_MODE) {
-					if (HumanPlayer.isDone()) {
-						break;
-					}
-				} else {
-					if (numRuns > MAX_RUNS) {
-						break;
-					}
+				//Should we play again?
+				if ((numRuns > MAX_RUNS) || player1.isDonePlaying() || player2.isDonePlaying()) {
+					break;
 				}
 
 			}

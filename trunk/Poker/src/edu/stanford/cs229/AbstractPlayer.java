@@ -27,6 +27,10 @@ public abstract class AbstractPlayer implements Serializable {
 		hand = new Hand();
 		this.name = name;
 	}
+	
+	public int getId() {
+		return 0;
+	}
 
 	public String getName() {
 		return name;

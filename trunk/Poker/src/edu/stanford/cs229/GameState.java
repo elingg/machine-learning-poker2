@@ -11,13 +11,13 @@ import java.util.List;
 public class GameState {
 
 	private final List<AbstractPlayer> players;
-	private final List<PlayerActionRecord> playerActionRecords;
+	private final List<PlayerActvityRecord> playerActionRecords;
 	/**
 	 * Constructor
 	 *
 	 */
 	public GameState(List<AbstractPlayer> players) {
-		playerActionRecords = new ArrayList<PlayerActionRecord>();
+		playerActionRecords = new ArrayList<PlayerActvityRecord>();
 		this.players = players;
 	}
 	
@@ -38,13 +38,11 @@ public class GameState {
 		return null;
 	}
 	
-	public void addPlayerActionRecord(PlayerActionRecord record) {
+	public void addPlayerActionRecord(PlayerActvityRecord record) {
 		playerActionRecords.add(record);
 	}
 
-	public List<PlayerActionRecord> getPlayerActionRecords() {
+	public List<PlayerActvityRecord> getPlayerActionRecords() {
 		return playerActionRecords;
 	}
-	
-	
 }

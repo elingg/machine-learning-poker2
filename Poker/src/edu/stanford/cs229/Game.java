@@ -54,8 +54,8 @@ public class Game extends Thread {
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 		
 		if(INTERACTIVE_MODE) {
-			Dealer dealer = new Dealer("Andrew");
-			Player player = new Player("Alec");
+			RandomPlayer dealer = new RandomPlayer("Andrew");
+			HumanPlayer player = new HumanPlayer("Alec");
 			players.add(dealer);
 			players.add(player);
 		} else if(!RESTORE_PLAYERS) {
@@ -160,7 +160,7 @@ public class Game extends Thread {
 				}
 
 				if (INTERACTIVE_MODE) {
-					if (Player.isDone()) {
+					if (HumanPlayer.isDone()) {
 						break;
 					}
 				} else {

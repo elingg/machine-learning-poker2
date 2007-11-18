@@ -4,7 +4,6 @@ package edu.stanford.cs229;
  * Represents actions that a player can take
  * 
  * @author ago 
- * TODO: Use enums?
  */
 public class ActionType {
 	public final static int CHECK_OR_CALL = 1;

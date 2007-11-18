@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Represents a deck(s) of cards (4)
+ * Represents a deck(s) of cards
  * 
  * @author ago
  * 

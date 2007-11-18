@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a hand that may be held by a player
+ *
+ */
 public class Hand implements Serializable {
 	private List<Card> playerCards;
 	private List<Card> tableCards;

@@ -26,7 +26,7 @@ public class Game extends Thread {
 	private final static boolean INTERACTIVE_MODE = false;
 	
 	//Number of games to be played
-	private final static int MAX_RUNS = 10;
+	private final static int MAX_RUNS = 10000000;
 	
 	//Load the player from disk?
 	private final static boolean RESTORE_PLAYERS = false;  
@@ -58,14 +58,14 @@ public class Game extends Thread {
 			HumanPlayer player = new HumanPlayer("Alec");
 			players.add(dealer);
 			players.add(player);
-		} else if(!RESTORE_PLAYERS) {
-			ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
-			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
-			players.add(player1);
-			players.add(player2);			
-		} else {
+		} else if(RESTORE_PLAYERS) {
 			ReinforcementLearningPlayer player1 = deserializePlayer("Elizabeth");
 			ReinforcementLearningPlayer player2 = deserializePlayer("Alec");
+			players.add(player1);
+			players.add(player2);
+		} else {
+			ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
+			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
 			players.add(player1);
 			players.add(player2);
 		}

@@ -160,10 +160,10 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		if(ev < FOLDING_THRESHOLD && numGames>NUM_GAMES_ALWAYS_CHECK)
 			return new PlayerAction(ActionType.FOLD, 0);
 		else if((Math.abs(ev-exp) < CHECKING_THRESHOLD) || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
-			return new PlayerAction(ActionType.CHECK_CALL,0);
+			return new PlayerAction(ActionType.CHECK_OR_CALL,0);
 		else {
 			betCountMaxForEachGame++;
-			return new PlayerAction(ActionType.BET_RAISE,10);
+			return new PlayerAction(ActionType.BET_OR_RAISE,10);
 		}
 	}
 	

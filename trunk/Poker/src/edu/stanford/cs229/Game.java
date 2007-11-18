@@ -27,9 +27,11 @@ public class Game extends Thread {
 	private final static boolean RESTORE_PLAYERS = false;
 	
 	private final Deck deck;
+	private List<AbstractPlayer> players;
 	
-	public Game() {
-		deck = new Deck();
+	public Game(List<AbstractPlayer> players) {
+		this.deck = new Deck();
+		this.players = players;
 	}
 	
 	/**
@@ -41,8 +43,6 @@ public class Game extends Thread {
 		//Set up the logging config
 		//TODO: The following doesn't work.
 		System.setProperty("java.util.logging.config.file", "logging.properties");
-		
-		Game game = new Game();
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 		
@@ -58,7 +58,8 @@ public class Game extends Thread {
 			players.add(player2);
 		}
 		
-		game.run(players);
+		Game game = new Game(players);
+		game.run();
 	}	
 	
 	/**
@@ -66,105 +67,111 @@ public class Game extends Thread {
 	 * Player1 is the dealer
 	 * @throws ApplicationException
 	 */
-	public void run(List<AbstractPlayer> players) throws ApplicationException {
-		AbstractPlayer player1 = players.get(0);
-		AbstractPlayer player2 = players.get(1);
-		
-		GameState state = new GameState(players);
-		boolean done = false;
-		int numRuns = 0;
-		
-		while (!done) {
-			numRuns++;
-			deck.shuffleDeck();
-			
-			logger.info("Number of Runs: " + numRuns);
-			
-			logger.fine("\nStarting new game!");
-			logger.fine(player1.getName() + " has $" + player1.getBankroll());
-			logger.fine(player2.getName() + " has $" + player2.getBankroll());
-			boolean continueGame = true;
+	public void run() {
+		try {
+			AbstractPlayer player1 = players.get(0);
+			AbstractPlayer player2 = players.get(1);
 
-			//Small blind and big blind
-			player1.addPotByBlind(5);
-			player2.addPotByBlind(5);
-			
-			// Step 1: "Pre-flop"
-			player1.addPlayerCard(deck.drawCard());
-			player1.addPlayerCard(deck.drawCard());
-			player2.addPlayerCard(deck.drawCard());
-			player2.addPlayerCard(deck.drawCard());
-			continueGame = processBettingRound(player1, player2, state);
-			if(!continueGame) {
-				continue;
-			}
-			
-			// Step 2: "Flop"
-			Card tcard1 = deck.drawCard();
-			Card tcard2 = deck.drawCard();
-			Card tcard3 = deck.drawCard();
-			player1.addTableCard(tcard1);
-			player1.addTableCard(tcard2);
-			player1.addTableCard(tcard3);
-			player2.addTableCard(tcard1);
-			player2.addTableCard(tcard2);
-			player2.addTableCard(tcard3);
-			continueGame = processBettingRound(player1, player2, state);
-			if(!continueGame) {
-				continue;
-			}
-			
-			// Step 3: "Turn"
-			Card tcard = deck.drawCard();
-			player1.addTableCard(tcard);
-			player2.addTableCard(tcard);
-			continueGame = processBettingRound(player2, player1, state);
-			if(!continueGame) {
-				continue;
-			}
-			
-			// Step 4: "River"
-			tcard = deck.drawCard();
-			player1.addTableCard(tcard);
-			player2.addTableCard(tcard);
-			continueGame = processBettingRound(player2, player1, state);
-			if(!continueGame) {
-				continue;
-			}
-			
-			// Step 5: "Showdown"
-			Hand h = Util.findWinner(player1.getHand(), player2.getHand());
-			if (h == null) {
-				logger.fine("TIE!");				
-				player1.processEndOfGame(ResultState.TIE);
-				player2.processEndOfGame(ResultState.TIE);
-			} else if (h.equals(player1.getHand())) {
-				processWinner(player1, player2);
-			} else {
-				processWinner(player2, player1);
-			}
-			
-			if (INTERACTIVE_MODE) {
-				if(Player.isDone()) {
-					break;
+			GameState state = new GameState(players);
+			boolean done = false;
+			int numRuns = 0;
+
+			while (!done) {
+				numRuns++;
+				deck.shuffleDeck();
+
+				logger.info("Number of Runs: " + numRuns);
+
+				logger.fine("\nStarting new game!");
+				logger.fine(player1.getName() + " has $"
+						+ player1.getBankroll());
+				logger.fine(player2.getName() + " has $"
+						+ player2.getBankroll());
+				boolean continueGame = true;
+
+				// Small blind and big blind
+				player1.addPotByBlind(5);
+				player2.addPotByBlind(5);
+
+				// Step 1: "Pre-flop"
+				player1.addPlayerCard(deck.drawCard());
+				player1.addPlayerCard(deck.drawCard());
+				player2.addPlayerCard(deck.drawCard());
+				player2.addPlayerCard(deck.drawCard());
+				continueGame = processBettingRound(player1, player2, state);
+				if (!continueGame) {
+					continue;
 				}
-			} else {
-				if(numRuns > MAX_RUNS) {
-					break;
+
+				// Step 2: "Flop"
+				Card tcard1 = deck.drawCard();
+				Card tcard2 = deck.drawCard();
+				Card tcard3 = deck.drawCard();
+				player1.addTableCard(tcard1);
+				player1.addTableCard(tcard2);
+				player1.addTableCard(tcard3);
+				player2.addTableCard(tcard1);
+				player2.addTableCard(tcard2);
+				player2.addTableCard(tcard3);
+				continueGame = processBettingRound(player1, player2, state);
+				if (!continueGame) {
+					continue;
 				}
+
+				// Step 3: "Turn"
+				Card tcard = deck.drawCard();
+				player1.addTableCard(tcard);
+				player2.addTableCard(tcard);
+				continueGame = processBettingRound(player2, player1, state);
+				if (!continueGame) {
+					continue;
+				}
+
+				// Step 4: "River"
+				tcard = deck.drawCard();
+				player1.addTableCard(tcard);
+				player2.addTableCard(tcard);
+				continueGame = processBettingRound(player2, player1, state);
+				if (!continueGame) {
+					continue;
+				}
+
+				// Step 5: "Showdown"
+				Hand h = Util.findWinner(player1.getHand(), player2.getHand());
+				if (h == null) {
+					logger.fine("TIE!");
+					player1.processEndOfGame(ResultState.TIE);
+					player2.processEndOfGame(ResultState.TIE);
+				} else if (h.equals(player1.getHand())) {
+					processWinner(player1, player2);
+				} else {
+					processWinner(player2, player1);
+				}
+
+				if (INTERACTIVE_MODE) {
+					if (Player.isDone()) {
+						break;
+					}
+				} else {
+					if (numRuns > MAX_RUNS) {
+						break;
+					}
+				}
+
 			}
 
+			if (player1 instanceof ReinforcementLearningPlayer) {
+				((ReinforcementLearningPlayer) player1).debugResults();
+			}
+
+			for (AbstractPlayer player : players) {
+				logger.info(player.getName() + " had " + player.getBankroll());
+			}
+
+			serializePlayers(players);
+		} catch (ApplicationException e) {
+			e.printStackTrace();
 		}
-		
-		if(player1 instanceof ReinforcementLearningPlayer) {
-			((ReinforcementLearningPlayer) player1).debugResults();
-		}
-		
-		for(AbstractPlayer player : players) {
-			logger.info(player.getName() + " had " + player.getBankroll());			
-		}
-		
-		serializePlayers(players);		
 	}
 	
 	/**

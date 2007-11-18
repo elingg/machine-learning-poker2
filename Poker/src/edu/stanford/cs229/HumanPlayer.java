@@ -43,7 +43,7 @@ public class HumanPlayer extends AbstractPlayer {
 		}
 	}
 	
-	public static boolean isDone() {
+	public boolean isDonePlaying() {
 		InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader stdin = new BufferedReader(isr);
 		System.out.print("Player again? (Y/N)");

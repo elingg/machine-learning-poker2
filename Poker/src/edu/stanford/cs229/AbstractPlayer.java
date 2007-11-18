@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 
 /**
- * This is a base class that represents a player. The computer dealer and the
- * human player is derived from this.
+ * This is a base class that represents a player. All players (e.g. HumanPlayer,
+ * ReinforcementLearningPlayer, etc.) should extend this class.  The game engine
+ * calls these funcitons directly.
  * 
  * @author ago
  * 
@@ -82,6 +83,15 @@ public abstract class AbstractPlayer implements Serializable {
 		hand = new Hand();
 		pot = 0;
 	}
+	
+	/**
+	 * Called at the end of each game, to see if player wants to continue playing.
+	 * This is needed when a human is playing (i.e. HumanPlayer or WebPlayer)
+	 * @return
+	 */
+	public boolean isDonePlaying() {
+		return false;
+	}
 
 	public String toString() {
 		String s = "";
@@ -93,5 +103,6 @@ public abstract class AbstractPlayer implements Serializable {
 
 	public abstract PlayerAction getAction(GameState state)
 			throws ApplicationException;
+	
 	
 }

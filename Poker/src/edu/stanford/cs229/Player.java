@@ -24,7 +24,7 @@ public class Player extends AbstractPlayer {
 				System.out.print("(c)heck/(f)old/(b)et?");
 				String actionType = stdin.readLine();
 				if (actionType.indexOf("c") != -1) {
-					return new PlayerAction(ActionType.CHECK, -1);
+					return new PlayerAction(ActionType.CHECK_CALL, -1);
 				} else if (actionType.indexOf("b") != -1) {
 					/* Uncomment the following to allow players to bet an amount
 					System.out.println("How much?");
@@ -32,7 +32,7 @@ public class Player extends AbstractPlayer {
 					*/					
 					//For now, we always bet $10
 					int bet = 10;
-					return new PlayerAction(ActionType.BET, bet);
+					return new PlayerAction(ActionType.BET_RAISE, bet);
 				} else if (actionType.indexOf("f") != -1) {
 					return new PlayerAction(ActionType.FOLD, -1);
 				}

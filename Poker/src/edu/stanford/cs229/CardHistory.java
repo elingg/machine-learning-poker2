@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Represents the card history across all games
  * @author ago
- *
+ * @deprecated Nobody uses this.
  */
 public class CardHistory {
 	private List<Card> cards;

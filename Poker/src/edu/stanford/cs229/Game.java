@@ -28,7 +28,7 @@ public class Game extends Thread {
 	
 	private final Deck deck;
 	private List<AbstractPlayer> players;
-	
+	private GameState gameState;
 	public Game(List<AbstractPlayer> players) {
 		this.deck = new Deck();
 		this.players = players;
@@ -46,7 +46,12 @@ public class Game extends Thread {
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 		
-		if(!RESTORE_PLAYERS) {
+		if(INTERACTIVE_MODE) {
+			Dealer dealer = new Dealer("Andrew");
+			Player player = new Player("Alec");
+			players.add(dealer);
+			players.add(player);
+		} else if(!RESTORE_PLAYERS) {
 			ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
 			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
 			players.add(player1);
@@ -63,8 +68,8 @@ public class Game extends Thread {
 	}	
 	
 	/**
-	 * Runs the game.  Currently only 2 players are supported.
-	 * Player1 is the dealer
+	 * Runs the game.  Currently only 2 players are supported, but is could be possibly expanded to multiple players.
+	 * The first player in the array list is the dealer.  
 	 * @throws ApplicationException
 	 */
 	public void run() {
@@ -72,7 +77,8 @@ public class Game extends Thread {
 			AbstractPlayer player1 = players.get(0);
 			AbstractPlayer player2 = players.get(1);
 
-			GameState state = new GameState(players);
+			gameState = new GameState(players);
+			
 			boolean done = false;
 			int numRuns = 0;
 
@@ -98,7 +104,7 @@ public class Game extends Thread {
 				player1.addPlayerCard(deck.drawCard());
 				player2.addPlayerCard(deck.drawCard());
 				player2.addPlayerCard(deck.drawCard());
-				continueGame = processBettingRound(player1, player2, state);
+				continueGame = processBettingRound(player1, player2, 1, false);
 				if (!continueGame) {
 					continue;
 				}
@@ -113,7 +119,7 @@ public class Game extends Thread {
 				player2.addTableCard(tcard1);
 				player2.addTableCard(tcard2);
 				player2.addTableCard(tcard3);
-				continueGame = processBettingRound(player1, player2, state);
+				continueGame = processBettingRound(player1, player2, 2, false);
 				if (!continueGame) {
 					continue;
 				}
@@ -122,7 +128,7 @@ public class Game extends Thread {
 				Card tcard = deck.drawCard();
 				player1.addTableCard(tcard);
 				player2.addTableCard(tcard);
-				continueGame = processBettingRound(player2, player1, state);
+				continueGame = processBettingRound(player2, player1, 3, false);
 				if (!continueGame) {
 					continue;
 				}
@@ -131,7 +137,7 @@ public class Game extends Thread {
 				tcard = deck.drawCard();
 				player1.addTableCard(tcard);
 				player2.addTableCard(tcard);
-				continueGame = processBettingRound(player2, player1, state);
+				continueGame = processBettingRound(player2, player1, 4, false);
 				if (!continueGame) {
 					continue;
 				}
@@ -179,23 +185,35 @@ public class Game extends Thread {
 	 * @param player1
 	 * @param player2
 	 * @param state
+	 * @param isLastPerson indicates if this is the last person in the betting round, if they choose to check or call
 	 * @return Indicates if the game should continue.  True if yes, false if no (i.e. somebody folded).
 	 * @throws ApplicationException
 	 */
-	private boolean processBettingRound(AbstractPlayer player1, AbstractPlayer player2, GameState state) throws ApplicationException {
+	private boolean processBettingRound(AbstractPlayer player1, AbstractPlayer player2, int phase, boolean isLastPerson) throws ApplicationException {
 		printTableState(player1, player2);
-		PlayerAction action = player1.getAction(state);
-		//state.processPlayer1Action(player1, action);
+		PlayerAction action = player1.getAction(gameState);
+		
+		//TODO: Fill details in later
+		gameState.addPlayerActionRecord(new PlayerActionRecord("", player1.getName(), 0, 0, action));
+		
 		if(action.getActionType() == ActionType.FOLD) {
 			logger.fine(player1.getName() + " folds");
 			processWinner(player2, player1);
 			return false;
-		} else if(action.getActionType() == ActionType.CHECK){
-			logger.fine(player1.getName() + " checks");
-			return processBettingRound2(player2, player1, state);
-		} else if(action.getActionType() == ActionType.BET) {
+		} else if(action.getActionType() == ActionType.CHECK_CALL){
+			if(!isLastPerson) {
+				logger.fine(player1.getName() + " checks");
+				return processBettingRound(player2, player1, phase, true);
+			} else {
+				matchBetIfNecessary(player1, player2);
+				return true;
+			}
+		} else if(action.getActionType() == ActionType.BET_RAISE) {
+			if(isLastPerson) {
+				matchBetIfNecessary(player1, player2);
+			}
 			player1.addPotByBetting(action.getBet());
-			return processBettingRound2(player2, player1, state);
+			return processBettingRound(player2, player1, phase, true);
 		}
 		//TODO refactor this:
 		return false;
@@ -210,23 +228,25 @@ public class Game extends Thread {
 	 * @throws ApplicationException
 	 * TODO: There is a lot of redundant code between this and processBettingRound
 	 */
-	private boolean processBettingRound2(AbstractPlayer playerA, AbstractPlayer playerB, GameState state) throws ApplicationException {
-		PlayerAction action = playerA.getAction(state);
+	/*
+	private boolean processBettingRound2(AbstractPlayer playerA, AbstractPlayer playerB, int phase) throws ApplicationException {
+		PlayerAction action = playerA.getAction(gameState);
 		if(action.getActionType() == ActionType.FOLD) {
 			logger.fine(playerA.getName() + " folds");
 			processWinner(playerB, playerA);
 			return false;
-		} else if(action.getActionType() == ActionType.CHECK){
-			matchBetIfNecessary(playerA, playerB);
-			return true;
-		} else if(action.getActionType() == ActionType.BET) {
-			matchBetIfNecessary(playerA, playerB);
+		} else if(action.getActionType() == ActionType.CHECK_CALL){
+			matchBetIfNecessary(playerA, playerB); //diff
+			return true;  //diff
+		} else if(action.getActionType() == ActionType.BET_RAISE) {
+			matchBetIfNecessary(playerA, playerB);  //diff
 			playerA.addPotByBetting(action.getBet());
-			return processBettingRound2(playerB, playerA, state);
+			return processBettingRound2(playerB, playerA, phase);
 		}
 		//TODO refactor this:
 		return false;
 	}
+	*/
 	
 	/**
 	 * Player A must match Player B's bet
@@ -236,7 +256,7 @@ public class Game extends Thread {
 	private void matchBetIfNecessary(AbstractPlayer playerA, AbstractPlayer playerB) {
 		if(playerA.getPot() < playerB.getPot()) {
 			int bet = playerB.getPot() - playerA.getPot();
-			playerA.addPotByChecking(bet);
+			playerA.addPotByCalling(bet);
 		}
 	}
 	
@@ -262,7 +282,7 @@ public class Game extends Thread {
 	 * @param player2
 	 */
 	private static void printTableState(AbstractPlayer player1, AbstractPlayer player2) {
-		logger.fine("Table has: " + getCardListString(player2.getTableCards()));
+		logger.fine("Table has: " + getCardListString(player2.getHand().getTableCards()));
 		logger.fine(player1.getName() + " has: " + player1.toString());
 		logger.fine(player2.getName() + " has: " + player2.toString());
 	}
@@ -318,5 +338,9 @@ public class Game extends Thread {
 		} catch(ClassNotFoundException e) {
 			throw new ApplicationException(e);
 		}		
+	}
+
+	public GameState getGameState() {
+		return gameState;
 	}
 }

@@ -18,12 +18,12 @@ public class Dealer extends AbstractPlayer{
 		double decision = 1;
 		
 		if(decision < 0.33) {
-			return new PlayerAction(ActionType.CHECK, 0);
+			return new PlayerAction(ActionType.CHECK_CALL, 0);
 		} else if(decision < 0.66) {
 			return new PlayerAction(ActionType.FOLD, 0);
 		} else {
 			//Always bet 10
-			return new PlayerAction(ActionType.BET, 10);
+			return new PlayerAction(ActionType.BET_RAISE, 10);
 		}
 	}
 }

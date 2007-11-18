@@ -1,16 +1,8 @@
 package edu.stanford.cs229;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Util {
-	
-	public Util()
-	{
-		
-	}
-	
-	
 	static final int straightflush=800;
 	static final int fourkind=700;
 	static final int fullhouse=600;
@@ -20,17 +12,19 @@ public class Util {
 	static final int twopair=200;
 	static final int pair=100;
 	
+	/**
+	 * Private constructor ensures that this is never instantiated
+	 *
+	 */
+	private Util() {}
 
 	public static int findHighCardValue(List<Card> cardList)
-	{
-		
-		
+	{		
 		if(cardList!=null)
 		{
 			Collections.sort(cardList);
 			return cardList.get(cardList.size()-1).getValue();
 		}
-		
 		return -1;
 	}
 	
@@ -89,8 +83,7 @@ public class Util {
 		else if(hand2val > hand1val)
 			return hand2;
 		else
-			return null;
-		
+			return null;		
 	}
 	
 	public static int computeValue(Hand hand)
@@ -98,15 +91,10 @@ public class Util {
 		findBestCards(hand);
 		int handval;
 		
-		if(hand.getValue()==-1)
-		{
-			handval=findHighCardValue(hand.getAllCards());
-		}
-		else
+		if (hand.getValue() == -1) {
+			handval = findHighCardValue(hand.getAllCards());
+		} else
 			handval=hand.getValue() + findHighCardValue(findBestCards(hand));
 		return handval;
 	}
-	
-	
-  
 }

@@ -22,12 +22,13 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
  *
  */
 public class Game {
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
+	
 	private final static boolean INTERACTIVE_MODE = false;
-	private final static int MAX_RUNS = 100000;
+	private final static int MAX_RUNS = 10;
+	private final static boolean RESTORE_PLAYERS = true;
 	
 	private final Deck deck;
-	
-	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
 	
 	public Game() {
 		deck = new Deck();
@@ -40,54 +41,59 @@ public class Game {
 	 */
 	public static void main(String[] args) throws ApplicationException {
 		Game game = new Game();
-		//Dealer player1 = new Dealer("Dealer");
-		//Player player2 = new Player("Andrew Ng");
 		
-		ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
-		ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
+		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 		
-		//ReinforcementLearningPlayer player1 = deserializePlayer("Alec");
-		//ReinforcementLearningPlayer player2 = deserializePlayer("Elizabeth");
-		logger.info(player1.getName() + player1.getBankroll());
-		logger.info(player2.getName() + player2.getBankroll());
-		game.run(player1, player2);
+		if(!RESTORE_PLAYERS) {
+			ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
+			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
+			players.add(player1);
+			players.add(player2);			
+		} else {
+			ReinforcementLearningPlayer player1 = deserializePlayer("Elizabeth");
+			ReinforcementLearningPlayer player2 = deserializePlayer("Alec");
+			players.add(player1);
+			players.add(player2);
+		}
+		
+		game.run(players);
 	}	
 	
 	/**
-	 * Runs the game
+	 * Runs the game.  Currently only 2 players are supported.
 	 * Player1 is the dealer
 	 * @throws ApplicationException
 	 */
-	public void run(AbstractPlayer player1, AbstractPlayer player2) throws ApplicationException {
-		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
-		players.add(player1);
-		players.add(player2);
+	public void run(List<AbstractPlayer> players) throws ApplicationException {
+		AbstractPlayer player1 = players.get(0);
+		AbstractPlayer player2 = players.get(1);
+		
 		GameState state = new GameState(players);
 		boolean done = false;
 		int numRuns = 0;
+		
 		while (!done) {
 			numRuns++;
-			if(numRuns % 4 == 0) {
-				deck.shuffleDeck();
-			}
+			deck.shuffleDeck();
+			
 			logger.info("Number of Runs: " + numRuns);
 			
 			logger.fine("\nStarting new game!");
 			logger.fine(player1.getName() + " has $" + player1.getBankroll());
 			logger.fine(player2.getName() + " has $" + player2.getBankroll());
-			boolean shouldContinue = true;
+			boolean continueGame = true;
 
 			//Small blind and big blind
-			player1.getBlind(5);
-			player2.getBlind(5);
+			player1.addPotByBlind(5);
+			player2.addPotByBlind(5);
 			
 			// Step 1: "Pre-flop"
 			player1.addPlayerCard(deck.drawCard());
 			player1.addPlayerCard(deck.drawCard());
 			player2.addPlayerCard(deck.drawCard());
 			player2.addPlayerCard(deck.drawCard());
-			shouldContinue = processBettingRound(player1, player2, state);
-			if(!shouldContinue) {
+			continueGame = processBettingRound(player1, player2, state);
+			if(!continueGame) {
 				continue;
 			}
 			
@@ -101,8 +107,8 @@ public class Game {
 			player2.addTableCard(tcard1);
 			player2.addTableCard(tcard2);
 			player2.addTableCard(tcard3);
-			shouldContinue = processBettingRound(player1, player2, state);
-			if(!shouldContinue) {
+			continueGame = processBettingRound(player1, player2, state);
+			if(!continueGame) {
 				continue;
 			}
 			
@@ -110,8 +116,8 @@ public class Game {
 			Card tcard = deck.drawCard();
 			player1.addTableCard(tcard);
 			player2.addTableCard(tcard);
-			shouldContinue = processBettingRound(player2, player1, state);
-			if(!shouldContinue) {
+			continueGame = processBettingRound(player2, player1, state);
+			if(!continueGame) {
 				continue;
 			}
 			
@@ -119,18 +125,15 @@ public class Game {
 			tcard = deck.drawCard();
 			player1.addTableCard(tcard);
 			player2.addTableCard(tcard);
-			shouldContinue = processBettingRound(player2, player1, state);
-			if(!shouldContinue) {
+			continueGame = processBettingRound(player2, player1, state);
+			if(!continueGame) {
 				continue;
 			}
 			
 			// Step 5: "Showdown"
-
-			Util util = new Util();
-			Hand h = util.findWinner(player1.getHand(), player2.getHand());
+			Hand h = Util.findWinner(player1.getHand(), player2.getHand());
 			if (h == null) {
-				logger.fine("TIE!");
-				
+				logger.fine("TIE!");				
 				player1.processEndOfGame(ResultState.TIE);
 				player2.processEndOfGame(ResultState.TIE);
 			} else if (h.equals(player1.getHand())) {
@@ -140,22 +143,10 @@ public class Game {
 			}
 			
 			if (INTERACTIVE_MODE) {
-				InputStreamReader isr = new InputStreamReader(System.in);
-				BufferedReader stdin = new BufferedReader(isr);
-				System.out.print("Player again? (Y/N)");
-				try {
-					String response = stdin.readLine();
-					if ((response.indexOf("n") != -1)
-							|| (response.indexOf("N") != -1)) {
-						logger.fine("Ending game");
-						break;
-
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
+				if(Player.isDone()) {
+					break;
 				}
 			} else {
-				
 				if(numRuns > MAX_RUNS) {
 					break;
 				}
@@ -275,11 +266,16 @@ public class Game {
 	private static String getCardListString(List<Card> cards) {
 		String s = "";
 		for (Card c : cards) {
-			s += "[" + c.getValue() + "," + c.getSuite() + "]";
+			s += "[" + c.getValue() + "," + c.getSuit() + "]";
 		}
 		return s;
 	}
 	
+	/**
+	 * Serializes a ReinforcementLearnerPlayer
+	 * @param players
+	 * @throws ApplicationException
+	 */
 	private static void serializePlayers(List<AbstractPlayer> players) throws ApplicationException {
 		try {
 			for (AbstractPlayer player : players) {
@@ -293,11 +289,15 @@ public class Game {
 		}
 	}
 	
+	/**
+	 * Deserializes a ReinforcementLearnerPlayer
+	 * @param name
+	 * @return
+	 * @throws ApplicationException
+	 */
 	private static ReinforcementLearningPlayer deserializePlayer(String name) throws ApplicationException{
 		ObjectInput input = null;
 		try {
-			
-		
 	      InputStream file = new FileInputStream(name);
 	      InputStream buffer = new BufferedInputStream( file );
 	      input = new ObjectInputStream ( buffer );

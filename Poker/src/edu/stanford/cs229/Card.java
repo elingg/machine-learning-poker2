@@ -1,11 +1,13 @@
 package edu.stanford.cs229;
 
+import java.io.Serializable;
+
 /**
  * Represents a card, which consists of a value and a suit
  * @author ago
  *
  */
-public class Card implements Comparable {
+public class Card implements Comparable, Serializable {
 	private final int value;
 
 	private final int suit;

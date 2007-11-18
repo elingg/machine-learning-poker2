@@ -7,9 +7,9 @@ package edu.stanford.cs229;
  * TODO: Use enums?
  */
 public class ActionType {
-	public final static int CHECK_CALL = 1;
+	public final static int CHECK_OR_CALL = 1;
 
 	public final static int FOLD = 2;
 
-	public final static int BET_RAISE = 3;
+	public final static int BET_OR_RAISE = 3;
 }

@@ -22,13 +22,20 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 public class Game extends Thread {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
 	
+	//Interactive mode
 	private final static boolean INTERACTIVE_MODE = false;
-	private final static int MAX_RUNS = 10;
-	private final static boolean RESTORE_PLAYERS = false;
 	
+	//Number of games to be played
+	private final static int MAX_RUNS = 10;
+	
+	//Load the player from disk?
+	private final static boolean RESTORE_PLAYERS = false;  
+	
+	private int numRuns = 0;
 	private final Deck deck;
 	private List<AbstractPlayer> players;
 	private GameState gameState;
+	
 	public Game(List<AbstractPlayer> players) {
 		this.deck = new Deck();
 		this.players = players;
@@ -76,16 +83,14 @@ public class Game extends Thread {
 		try {
 			AbstractPlayer player1 = players.get(0);
 			AbstractPlayer player2 = players.get(1);
-
-			gameState = new GameState(players);
 			
 			boolean done = false;
-			int numRuns = 0;
 
 			while (!done) {
 				numRuns++;
 				deck.shuffleDeck();
-
+				gameState = new GameState(players);
+				
 				logger.info("Number of Runs: " + numRuns);
 
 				logger.fine("\nStarting new game!");
@@ -181,7 +186,7 @@ public class Game extends Thread {
 	}
 	
 	/**
-	 * Betting part 1
+	 * Processes a betting around
 	 * @param player1
 	 * @param player2
 	 * @param state
@@ -194,13 +199,13 @@ public class Game extends Thread {
 		PlayerAction action = player1.getAction(gameState);
 		
 		//TODO: Fill details in later
-		gameState.addPlayerActionRecord(new PlayerActionRecord("", player1.getName(), 0, 0, action));
+		gameState.addPlayerActionRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
 		
 		if(action.getActionType() == ActionType.FOLD) {
 			logger.fine(player1.getName() + " folds");
 			processWinner(player2, player1);
 			return false;
-		} else if(action.getActionType() == ActionType.CHECK_CALL){
+		} else if(action.getActionType() == ActionType.CHECK_OR_CALL){
 			if(!isLastPerson) {
 				logger.fine(player1.getName() + " checks");
 				return processBettingRound(player2, player1, phase, true);
@@ -208,7 +213,7 @@ public class Game extends Thread {
 				matchBetIfNecessary(player1, player2);
 				return true;
 			}
-		} else if(action.getActionType() == ActionType.BET_RAISE) {
+		} else if(action.getActionType() == ActionType.BET_OR_RAISE) {
 			if(isLastPerson) {
 				matchBetIfNecessary(player1, player2);
 			}
@@ -268,6 +273,7 @@ public class Game extends Thread {
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
 		logger.fine("Entering processWinner");
 		logger.fine(winner.getName() + " wins!");
+		gameState.addPlayerActionRecord(new PlayerActvityRecord(winner.getId(), winner.getName(), numRuns, 0, ResultState.WIN));
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
 		

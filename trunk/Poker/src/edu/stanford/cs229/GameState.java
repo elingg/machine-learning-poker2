@@ -10,36 +10,20 @@ import java.util.List;
  */
 public class GameState {
 
-	private int player1Pot = 0;
-	private int player2Pot = 0;
+	private final List<AbstractPlayer> players;
 	/**
 	 * Constructor
 	 *
 	 */
-	public GameState() {
-		
-	}
-	
-	public void processPlayer1Action(AbstractPlayer player, PlayerAction action) {
-		if(action.getActionType() == ActionType.BET) {
-			System.out.println(player.getName() + " bets " + action.getBet());
-			player1Pot += action.getBet();
-		}
-	}
-	
-	public void processPlayer2Action(AbstractPlayer player, PlayerAction action) {
-		if(action.getActionType() == ActionType.BET) {
-			System.out.println(player.getName() + " bets " + action.getBet());
-			player1Pot += action.getBet();
-		}
+	public GameState(List<AbstractPlayer> players) {
+		this.players = players;
 	}
 	
 	public int getTotalPot() {
-		return player1Pot + player2Pot;
+		int totalPot = 0;
+		for(AbstractPlayer player : players) {
+			totalPot += player.getPot();
+		}
+		return totalPot;
 	}
-
-	public int getPlayer1Pot() {
-		return player1Pot;
-	}
-
 }

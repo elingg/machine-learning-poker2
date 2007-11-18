@@ -19,7 +19,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
  * @author ago
  *
  */
-public class Game {
+public class Game extends Thread {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
 	
 	private final static boolean INTERACTIVE_MODE = false;
@@ -172,7 +172,7 @@ public class Game {
 	 * @param player1
 	 * @param player2
 	 * @param state
-	 * @return
+	 * @return Indicates if the game should continue.  True if yes, false if no (i.e. somebody folded).
 	 * @throws ApplicationException
 	 */
 	private boolean processBettingRound(AbstractPlayer player1, AbstractPlayer player2, GameState state) throws ApplicationException {

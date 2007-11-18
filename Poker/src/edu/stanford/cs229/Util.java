@@ -28,45 +28,34 @@ public class Util {
 		return -1;
 	}
 	
-	public static List<Card> findBestCards(Hand hand)
-	{
-		if(hand.isStraightFlush()!=null)
-		{
+	/**
+	 * Finds the best cards.
+	 * @param hand
+	 * @return
+	 */
+	public static List<Card> findBestCards(Hand hand) {
+		if (hand.isStraightFlush() != null) {
 			hand.setValue(straightflush);
 			return hand.isStraightFlush();
-		}
-		else if(hand.isFlush()!=null)
-		{
-			hand.setValue(flush);
-			return hand.isFlush();
-		}
-		else if(hand.isStraight()!=null)
-		{
-			hand.setValue(straight);
-			return hand.isStraight();
-		}
-		else if(hand.isFourKind()!=null)
-		{
+		} else if (hand.isFourKind() != null) {
 			hand.setValue(fourkind);
 			return hand.isFourKind();
-		}
-		else if(hand.isFullHouse()!=null)
-		{
+		} else if (hand.isFullHouse() != null) {
 			hand.setValue(fullhouse);
 			return hand.isFullHouse();
-		}
-		else if(hand.isThreeKind()!=null)
-		{
+		} else if (hand.isStraight() != null) {
+			hand.setValue(straight);
+			return hand.isStraight();
+		} else if (hand.isFlush() != null) {
+			hand.setValue(flush);
+			return hand.isFlush();
+		} else if (hand.isThreeKind() != null) {
 			hand.setValue(threekind);
 			return hand.isThreeKind();
-		}
-		else if(hand.isTwoPair()!=null)
-		{
+		} else if (hand.isTwoPair() != null) {
 			hand.setValue(twopair);
 			return hand.isTwoPair();
-		}
-		else if(hand.isPair()!=null)
-		{
+		} else if (hand.isPair() != null) {
 			hand.setValue(pair);
 			return hand.isPair();
 		}

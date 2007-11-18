@@ -31,7 +31,7 @@ public class Game extends Thread {
 	private final static boolean RESTORE_PLAYERS = false;  
 	
 	//Number of games to be played
-	private final static int MAX_RUNS = 10000000;
+	private final static int MAX_RUNS = 100000;
 	
 	private int numRuns = 0;
 	private final Deck deck;

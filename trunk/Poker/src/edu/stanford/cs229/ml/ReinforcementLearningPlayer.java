@@ -1,9 +1,8 @@
 
 package edu.stanford.cs229.ml;
 
+import java.io.Serializable;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
 
 import edu.stanford.cs229.AbstractPlayer;
 import edu.stanford.cs229.ActionType;
@@ -14,7 +13,7 @@ import edu.stanford.cs229.PlayerAction;
 import edu.stanford.cs229.ResultState;
 import edu.stanford.cs229.Util;
 
-public class ReinforcementLearningPlayer extends AbstractPlayer {
+public class ReinforcementLearningPlayer extends AbstractPlayer implements Serializable {
 
 	private Hashtable<Integer,Fraction> initialState;
 	private Hashtable<Integer,Fraction> fiveCardState;
@@ -26,8 +25,14 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 	private int sixCardKey;
 	private int sevenCardKey;
 	
-	private int numRounds;
+	private int numGames;
+	private int betCountMaxForEachGame;
 	
+	/*
+	public ReinforcementLearningPlayer() {
+		super();
+	}
+	*/
 	
 	public ReinforcementLearningPlayer(String name)
 	{
@@ -44,7 +49,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 		initializeValues(fiveCardState);
 		initializeValues(sixCardState);
 		initializeValues(sevenCardState);
-		numRounds=0;
+		numGames=0;
 		
 	}
 	
@@ -111,66 +116,82 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 			sixCardState.put(sixCardKey, new Fraction(sixCardVal.getNumerator(),sixCardVal.getDenominator()+1));
 			sevenCardState.put(sevenCardKey,new Fraction(sevenCardVal.getNumerator(),sevenCardVal.getDenominator()+1));
 		}
-		numRounds++;
+		numGames++;
+		betCountMaxForEachGame = 0;
 		logger.finest("Before Clearing hand");
 		super.processEndOfGame(resultState);
 			
 	}
 	
-	private float findExpectedValue(int key,Hashtable<Integer,Fraction> state, int amount)
-	{
-		Fraction val=(Fraction)state.get(key);
-		float prob= val.getNumerator()/val.getDenominator();
-		return (amount*(prob) - amount*(1-prob));
-	}
+
 	
 	
 	@Override
 	public PlayerAction getAction(GameState state) throws ApplicationException {
 		if(this.hand.getAllCards().size() == 2) 
 			return getActionAfterNumCards(this.initialState);
-		
 		else if (this.hand.getAllCards().size()==5)
 			return getActionAfterNumCards(this.fiveCardState);
-		
 		else if (this.hand.getAllCards().size()==6)
 			return getActionAfterNumCards(this.sixCardState);
 		else if (this.hand.getAllCards().size()==7)
 			return getActionAfterNumCards(this.sevenCardState);
 
-		//throw new ApplicationException(this.hand.getAllCards().size() + "is not a valid value");
 		System.err.println(this.hand.getAllCards().size() + "is not a valid value");
-		return null;
-		
+		return null;		
 	}
 	
+	/**
+	 * Gets the player action, which is determined by the Hashtable of probabilities
+	 * @param ht
+	 * @return
+	 */
 	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht)
 	{
-		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot());
-		float expbet= findExpectedValue(Util.computeValue(this.hand), ht, this.getPot()+10);
+		float FOLDING_THRESHOLD = -10;
+		float CHECKING_THRESHOLD = 10;
+		int NUM_GAMES_ALWAYS_CHECK = 50000;  //always check a min number of games so that our player can leanr
+		//logger.fine(Integer.toString(Util.computeValue(this.hand)));
+		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), this.getPot()*2);
+		logger.fine(this.getName() + " expected value for checking: " + exp);
+		float expbet= findExpectedValue(Util.computeValue(this.hand), ht, this.getPot()+10, (this.getPot()+10)*2);
+		logger.fine(this.getName() + " expected value for betting: " + expbet);
 		float ev= Math.max(exp, expbet);
-		if(ev<0 && numRounds>100)
+		if(ev < FOLDING_THRESHOLD && numGames>NUM_GAMES_ALWAYS_CHECK)
 			return new PlayerAction(ActionType.FOLD, 0);
-		else if(ev==exp)
+		else if((Math.abs(ev-exp) < CHECKING_THRESHOLD) || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
 			return new PlayerAction(ActionType.CHECK,0);
-		else
+		else {
+			betCountMaxForEachGame++;
 			return new PlayerAction(ActionType.BET,10);
-		
+		}
 	}
 	
+	private float findExpectedValue(int key,Hashtable<Integer,Fraction> state, int amtLose, int amtWin)
+	{
+		Fraction val=(Fraction)state.get(key);
+		float prob= ((float)val.getNumerator()/(float)val.getDenominator());
+		
+		return (amtWin*(prob) - amtLose*(1-prob));
+	}
+	
+	/**
+	 * Writes results for each state hashtable
+	 *
+	 */
 	public void debugResults()
 	{
 		debugState(this.initialState);
 		debugState(this.fiveCardState);
 		debugState(this.sixCardState);
 		debugState(this.sevenCardState);
-
-		System.out.println();
 	}
 	
+	/**
+	 * 
+	 * @param ht
+	 */
 	public void debugState(Hashtable<Integer, Fraction> ht) {
-		
-		
 		for(int i=0; i<=800; i=i+100)
 		{
 			for(int j=2; j<=14; j++)
@@ -178,15 +199,6 @@ public class ReinforcementLearningPlayer extends AbstractPlayer {
 				System.out.println((i+j)+ " " + ht.get(i+j));
 			}
 		}
-		
-		/*Integer i;
-		Set<Integer> set = ht.keySet();
-	    Iterator<Integer> itr = set.iterator();
-	    while (itr.hasNext()) {
-	        i = itr.next();
-	        System.out.println(i + ": " + ht.get(i));
-	    }*/
-
 	}
 
 }

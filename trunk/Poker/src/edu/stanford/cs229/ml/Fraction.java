@@ -1,6 +1,8 @@
 package edu.stanford.cs229.ml;
 
-public class Fraction {
+import java.io.Serializable;
+
+public class Fraction implements Serializable {
 
 	private int numerator;
 	private int denominator;

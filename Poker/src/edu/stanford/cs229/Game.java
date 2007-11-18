@@ -3,6 +3,7 @@ package edu.stanford.cs229;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,7 +47,10 @@ public class Game {
 	 * @throws ApplicationException
 	 */
 	public void run(AbstractPlayer player1, AbstractPlayer player2) throws ApplicationException {
-		GameState state = new GameState();
+		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
+		players.add(player1);
+		players.add(player2);
+		GameState state = new GameState(players);
 		boolean done = false;
 		int numRuns = 0;
 		while (!done) {
@@ -56,9 +60,9 @@ public class Game {
 			}
 			logger.info("Number of Runs: " + numRuns);
 			
-			logger.info("\nStarting new game!");
-			logger.info(player1.getName() + " has $" + player1.getBankroll());
-			logger.info(player2.getName() + " has $" + player2.getBankroll());
+			logger.fine("\nStarting new game!");
+			logger.fine(player1.getName() + " has $" + player1.getBankroll());
+			logger.fine(player2.getName() + " has $" + player2.getBankroll());
 			boolean shouldContinue = true;
 			
 			// Step 1: "Pre-flop"
@@ -109,7 +113,7 @@ public class Game {
 			Util util = new Util();
 			Hand h = util.findWinner(player1.getHand(), player2.getHand());
 			if (h == null) {
-				logger.info("TIE!");
+				logger.fine("TIE!");
 				
 				player1.processEndOfGame(ResultState.TIE);
 				player2.processEndOfGame(ResultState.TIE);
@@ -127,7 +131,7 @@ public class Game {
 					String response = stdin.readLine();
 					if ((response.indexOf("n") != -1)
 							|| (response.indexOf("N") != -1)) {
-						logger.info("Ending game");
+						logger.fine("Ending game");
 						break;
 
 					}
@@ -161,11 +165,11 @@ public class Game {
 		PlayerAction action = player1.getAction(state);
 		//state.processPlayer1Action(player1, action);
 		if(action.getActionType() == ActionType.FOLD) {
-			logger.info(player1.getName() + " folds");
+			logger.fine(player1.getName() + " folds");
 			processWinner(player2, player1);
 			return false;
 		} else if(action.getActionType() == ActionType.CHECK){
-			logger.info(player1.getName() + " checks");
+			logger.fine(player1.getName() + " checks");
 			return processBettingRound2(player2, player1, state);
 		} else if(action.getActionType() == ActionType.BET) {
 			player1.addPotByBetting(action.getBet());
@@ -187,7 +191,7 @@ public class Game {
 	private boolean processBettingRound2(AbstractPlayer playerA, AbstractPlayer playerB, GameState state) throws ApplicationException {
 		PlayerAction action = playerA.getAction(state);
 		if(action.getActionType() == ActionType.FOLD) {
-			logger.info(playerA.getName() + " folds");
+			logger.fine(playerA.getName() + " folds");
 			processWinner(playerB, playerA);
 			return false;
 		} else if(action.getActionType() == ActionType.CHECK){
@@ -220,8 +224,8 @@ public class Game {
 	 * @param loser
 	 */
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
-		logger.info("Entering processWinner");
-		logger.info(winner.getName() + " wins!");
+		logger.fine("Entering processWinner");
+		logger.fine(winner.getName() + " wins!");
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
 		
@@ -236,9 +240,9 @@ public class Game {
 	 * @param player2
 	 */
 	private static void printTableState(AbstractPlayer player1, AbstractPlayer player2) {
-		logger.info("Table has: " + getCardListString(player2.getTableCards()));
-		logger.info(player1.getName() + " has: " + player1.toString());
-		logger.info(player2.getName() + " has: " + player2.toString());
+		logger.fine("Table has: " + getCardListString(player2.getTableCards()));
+		logger.fine(player1.getName() + " has: " + player1.toString());
+		logger.fine(player2.getName() + " has: " + player2.toString());
 	}
 
 	/**

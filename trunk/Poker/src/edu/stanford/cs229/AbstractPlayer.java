@@ -90,6 +90,7 @@ public abstract class AbstractPlayer implements Serializable {
 	 * @return
 	 */
 	public boolean isDonePlaying() {
+		logger.info("Base: isDonePlaying");
 		return false;
 	}
 

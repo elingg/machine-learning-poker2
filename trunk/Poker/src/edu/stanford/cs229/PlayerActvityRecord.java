@@ -10,8 +10,11 @@ public class PlayerActvityRecord {
 	private final String name;
 	private final int gameNum;
 	private final int phaseNum;
+	private Hand hand;
+	private int responseTime;
 	private PlayerAction playerAction;
 	private int resultState;
+	
 	
 	public PlayerActvityRecord (int playerId, String name, int gameNum, int phaseNum, PlayerAction playerAction) {
 		this.playerId = playerId;

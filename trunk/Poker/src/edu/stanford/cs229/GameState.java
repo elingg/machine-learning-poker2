@@ -11,13 +11,13 @@ import java.util.List;
 public class GameState {
 
 	private final List<AbstractPlayer> players;
-	private final List<PlayerActvityRecord> playerActionRecords;
+	private final List<PlayerActvityRecord> playerActivityRecords;
 	/**
 	 * Constructor
 	 *
 	 */
 	public GameState(List<AbstractPlayer> players) {
-		playerActionRecords = new ArrayList<PlayerActvityRecord>();
+		playerActivityRecords = new ArrayList<PlayerActvityRecord>();
 		this.players = players;
 	}
 	
@@ -38,11 +38,27 @@ public class GameState {
 		return null;
 	}
 	
-	public void addPlayerActionRecord(PlayerActvityRecord record) {
-		playerActionRecords.add(record);
+	public void addPlayerActivityRecord(PlayerActvityRecord record) {
+		playerActivityRecords.add(record);
 	}
 
-	public List<PlayerActvityRecord> getPlayerActionRecords() {
-		return playerActionRecords;
+	public List<PlayerActvityRecord> getPlayerActivityRecords() {
+		return playerActivityRecords;
+	}
+	
+	/**
+	 * Convenience method. Indicates if it is the end of a game. This looks at
+	 * the playerActivityRecords and see if the last item was a resultState.
+	 * 
+	 * @return
+	 */
+	public boolean isEndOfGame() {
+		System.out.println("Activity Record size: " + playerActivityRecords.size());
+		System.out.println("Result state is: " + playerActivityRecords.get(playerActivityRecords.size() - 1).getResultState());
+		if(playerActivityRecords.get(playerActivityRecords.size() - 1).getResultState() > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

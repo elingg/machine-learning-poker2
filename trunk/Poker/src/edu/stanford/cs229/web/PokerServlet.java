@@ -18,10 +18,11 @@ import edu.stanford.cs229.Constants;
 import edu.stanford.cs229.Game;
 import edu.stanford.cs229.PlayerAction;
 import edu.stanford.cs229.RandomPlayer;
-import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
  public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
+	 
 	public PokerServlet() {
 		super();
 	}   	
@@ -35,54 +36,47 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	}
 	
 	private void process(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession(true);
-		Object obj = session.getAttribute(Constants.GAME_ATTRIBUTE);
-		
-		if (obj == null) {
-			//Set up a new game
-			processNewGame(request, response, session);
-			setupLogger();
-		} else {
-			//Continue the session
-			Game game = (Game) obj;
-			boolean isEndOfGame = game.getGameState().isEndOfGame();
+		try {
+			HttpSession session = request.getSession(true);
+
+			//Set up a new game, if there is no Game object in the seesion
+			if (session.getAttribute(Constants.GAME_ATTRIBUTE) == null) {
+				String name = request.getParameter(Constants.NAME_PARAMETER);
+				processNewGame(name, session);
+				setupLogger();
+			} 
+			
 			WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
 			
-			//Unblock the game if it is waiting for a decision to be made
-			String isDonePlaying = request.getParameter(Constants.IS_DONE_PLAYING_PARAMETER);
-			if(isDonePlaying != null && !isDonePlaying.equals("")) {
-				player.setDecisionSignal(isDonePlaying);
+			//Process the player actions
+			String actionStr = request.getParameter(Constants.ACTION_TYPE_PARAMETER);
+			if(actionStr != null && !actionStr.equals("")) {
+				processPlayerAction(player, actionStr);
 			}
 			
-			if(!isEndOfGame) {
-				processPlayerAction(request, response, session);
-			} else {
-				request.setAttribute(Constants.END_OF_GAME_PARAMETER, new Boolean(true));
-				//Show page with "Continue: Yes/No" button and show results
+			//Process "play again" signal that happens at the end of a game
+			String playAgain = request.getParameter(Constants.PLAY_AGAIN_PARAMETER);
+			if(playAgain != null && !playAgain.equals("")) {
+				player.setPlayAgainSignal(playAgain);
 			}
-			
-			
-			
-		}
-		
-		WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
-		// Check if thread is awake again
-		try {
+				
+			//Wait until the game is ready for the player's next action
 			while (true) {
+				logger.info("Waiting");
 				Thread.sleep(1000);  //this value needs to be higher than the WebPlayer threshold.
 				if (player.isTurn()) {
 					break;
 				}
 			}
+			request.getRequestDispatcher("WEB-INF/game.jsp").forward(request, response);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}		
-		request.getRequestDispatcher("WEB-INF/game.jsp").forward(request, response);
+		}
 	}
 	
-	public void processNewGame(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws ServletException, IOException {
+	public void processNewGame(String name, HttpSession session) throws ServletException, IOException {
 		//Create game if it has not been set up for this session
-		String name = request.getParameter(Constants.NAME_PARAMETER);
+		
 		if(name == null || name.equals("")) {
 			name = "Guest";
 		}
@@ -98,9 +92,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		session.setAttribute(Constants.WEB_PLAYER, player2);
 	}
 	
-	public void processPlayerAction(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws ServletException, IOException {
-		String actionStr = request.getParameter(Constants.ACTION_TYPE_PARAMETER);
-		WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
+	public void processPlayerAction(WebPlayer player, String actionStr) {
 		if(actionStr.equals(Constants.FOLD_LABEL)) {
 			player.setCurrentAction(new PlayerAction(ActionType.FOLD, 0));
 		}
@@ -108,9 +100,8 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 			player.setCurrentAction(new PlayerAction(ActionType.CHECK_OR_CALL, 0));
 		}
 		if(actionStr.equals(Constants.BET_RAISE_LABEL)) {
-			player.setCurrentAction(new PlayerAction(ActionType.BET_OR_RAISE, 0));
+			player.setCurrentAction(new PlayerAction(ActionType.BET_OR_RAISE, 10));
 		}
-
 	}
 	
 	private void setupLogger() {

@@ -4,17 +4,23 @@ import java.io.Serializable;
 
 import edu.stanford.cs229.AbstractPlayer;
 import edu.stanford.cs229.ApplicationException;
-import edu.stanford.cs229.Constants;
 import edu.stanford.cs229.GameState;
 import edu.stanford.cs229.PlayerAction;
 
+/**
+ * Whenever the GameEngine interacts with this class, we have to set the
+ * "isTurnSignal" to true, so that the servlet knows it can proceed.
+ * 
+ * @author ago
+ * 
+ */
 public class WebPlayer extends AbstractPlayer implements Serializable {
 	int SLEEP_DELAY = 500; //in ms
 	int MAX_ATTEMPTS = 1000;
 	
-	private String decisionSignal = null;
-	private PlayerAction currentAction = null;
-	private boolean isTurn;
+	private String playAgainSignal = null;
+	private PlayerAction currentAction = null;  //Signal: to let the Game thread know about the player's decision 
+	private boolean isTurnSignal;  //Signal used to let the Servlet know that it should show the page to the user
 	
 	public WebPlayer(String name) {
 		super(name);
@@ -24,7 +30,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 	 * PubSub model
 	 */
 	public PlayerAction getAction(GameState state) throws ApplicationException {
-		this.isTurn = true;
+		this.isTurnSignal = true;
 
 		try {
 			int count = 0;
@@ -32,6 +38,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 				count++;
 				//logger.finest("Did not find action for " + name);
 				Thread.sleep(SLEEP_DELAY);
+				logger.info("Waiting");
 			}
 		} catch(InterruptedException e) {
 			e.printStackTrace();
@@ -39,7 +46,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 		
 		PlayerAction action = new PlayerAction(currentAction.getActionType(), currentAction.getBet()); 
 		this.currentAction = null;
-		this.isTurn = false;
+		this.isTurnSignal = false;
 		return action;
 	}
 
@@ -52,22 +59,28 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 	}
 
 	public boolean isTurn() {
-		return isTurn;
+		return isTurnSignal;
 	}
 
 	public void setTurn(boolean isTurn) {
-		this.isTurn = isTurn;
+		this.isTurnSignal = isTurn;
 	}
 	
+	/**
+	 * Waits for the "decision" signal to continue
+	 */
 	public boolean isDonePlaying() {
-		System.out.println("Entering isDonePlaying");
+		isTurnSignal = true;  //Signal to servlet that it can continue
 		
 		int count = 0;
 		try {
-			while (decisionSignal == null && count < MAX_ATTEMPTS) {
+			while (playAgainSignal == null && count < MAX_ATTEMPTS) {
 				count++;
 				Thread.sleep(SLEEP_DELAY);
+				logger.info("Waiting");
 			}
+			playAgainSignal = null;
+			isTurnSignal = false;
 			return false;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -76,12 +89,14 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 		
 	}
 
-	public String getDecisionSignal() {
-		return decisionSignal;
+	
+	public String getPlayAgainSignal() {
+		return playAgainSignal;
 	}
 
-	public void setDecisionSignal(String decisionToContinue) {
-		this.decisionSignal = decisionToContinue;
+	public void setPlayAgainSignal(String decisionToContinue) {
+		this.playAgainSignal = decisionToContinue;
 	}
+	
 
 }

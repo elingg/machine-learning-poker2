@@ -162,11 +162,14 @@ public class Game extends Thread {
 
 				boolean player1Done = player1.isDonePlaying();
 				boolean player2Done = player2.isDonePlaying();
+				
 				//Should we play again?
 				if ((numRuns > MAX_RUNS) || player1Done || player2Done) {
 					break;
 				}
-
+				
+				player1.clearCardsAndPot();
+				player2.clearCardsAndPot();
 			}
 
 			
@@ -223,8 +226,7 @@ public class Game extends Thread {
 			player1.addPotByBetting(action.getBet());
 			return processBettingRound(player2, player1, phase, true);
 		}
-		//TODO refactor this:
-		return false;
+		throw new RuntimeException("PLAYER ENTERED BETTING ROUND WITHOUT AN ACTION");
 	}
 	
 	/**

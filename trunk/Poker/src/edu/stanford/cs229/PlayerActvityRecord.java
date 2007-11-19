@@ -34,24 +34,30 @@ public class PlayerActvityRecord {
 	
 	public String toString() {
 		if (playerAction != null) {
+			String amountString = "";
+			int amount = playerAction.getBet();
+			if(amount > 0) {
+				amountString += "$" + Integer.toString(amount);
+			}
 			if (playerAction.getActionType() == ActionType.FOLD)
 				return name + " folds";
 			if (playerAction.getActionType() == ActionType.BET_OR_RAISE)
-				return name + " bets/raises";
+				return name + " bets/raises " + amountString;
 			if (playerAction.getActionType() == ActionType.CHECK_OR_CALL)
-				return name + " checks/calls";
+				return name + " checks/calls " + amountString;
 		} else {
 			if (resultState == ResultState.WIN) {
-				return name + " wins!<br/>";
+				return "<b>" + name + " wins!</b>";
 			}
 			if (resultState == ResultState.TIE) {
-				return name + " ties<br/>";
+				return "<b>" + name + " ties</b>";
 			}
 			if (resultState == ResultState.LOSE) {
-				return name + " loses<br/>";
+				return "<b>" + name + " loses</b>";
 			}
 		}
 		return "ERROR";
+		
 	}
 
 	public int getGameNum() {

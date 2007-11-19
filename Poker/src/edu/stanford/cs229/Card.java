@@ -80,7 +80,7 @@ public class Card implements Comparable, Serializable {
 		default:
 			valueString = Integer.toString(value);
 		}
-		String imgLink = "<img src=\"images/ornamental_" + suitChar + "_"
+		String imgLink = "<img src=\"http://www.csse.monash.edu.au/~stevenm/texasholdem/images/ornamental_" + suitChar + "_"
 				+ valueString + "_small.png\">";
 		return imgLink;
 	}
@@ -90,7 +90,7 @@ public class Card implements Comparable, Serializable {
 	 * @return
 	 */
 	public static String getTableCardPlaceHolderAsHtml() {
-		return "<img src=\"images/cardspot_small.png\"/>";
+		return "<img src=\"http://www.csse.monash.edu.au/~stevenm/texasholdem/images/cardspot_small.png\"/>";
 	}
 	
 	

@@ -31,7 +31,7 @@ public class Game extends Thread {
 	private final static boolean RESTORE_PLAYERS = false;  
 	
 	//Number of games to be played
-	private final static int MAX_RUNS = 100000;
+	private final static int MAX_RUNS = 10;
 	
 	private int numRuns = 0;
 	private final Deck deck;
@@ -41,9 +41,7 @@ public class Game extends Thread {
 	public Game(List<AbstractPlayer> players) {
 		this.deck = new Deck();
 		this.players = players;
-	}	
-
-
+	}
 	
 	/**
 	 * Main entrypoint into the game
@@ -104,7 +102,7 @@ public class Game extends Thread {
 						+ player2.getBankroll());
 				boolean continueGame = true;
 
-				// Small blind and big blind
+				// Step 0: Blinds
 				player1.addPotByBlind(5);
 				player2.addPotByBlind(5);
 
@@ -114,57 +112,58 @@ public class Game extends Thread {
 				player2.addPlayerCard(deck.drawCard());
 				player2.addPlayerCard(deck.drawCard());
 				continueGame = processBettingRound(player1, player2, 1, false);
-				if (!continueGame) {
-					continue;
+
+				if (continueGame) {
+					// Step 2: "Flop"
+					Card tcard1 = deck.drawCard();
+					Card tcard2 = deck.drawCard();
+					Card tcard3 = deck.drawCard();
+					player1.addTableCard(tcard1);
+					player1.addTableCard(tcard2);
+					player1.addTableCard(tcard3);
+					player2.addTableCard(tcard1);
+					player2.addTableCard(tcard2);
+					player2.addTableCard(tcard3);
+					continueGame = processBettingRound(player1, player2, 2,
+							false);
 				}
 
-				// Step 2: "Flop"
-				Card tcard1 = deck.drawCard();
-				Card tcard2 = deck.drawCard();
-				Card tcard3 = deck.drawCard();
-				player1.addTableCard(tcard1);
-				player1.addTableCard(tcard2);
-				player1.addTableCard(tcard3);
-				player2.addTableCard(tcard1);
-				player2.addTableCard(tcard2);
-				player2.addTableCard(tcard3);
-				continueGame = processBettingRound(player1, player2, 2, false);
-				if (!continueGame) {
-					continue;
+				Card tcard;
+				if (continueGame) {
+					// Step 3: "Turn"
+					tcard = deck.drawCard();
+					player1.addTableCard(tcard);
+					player2.addTableCard(tcard);
+					continueGame = processBettingRound(player2, player1, 3,
+							false);
 				}
 
-				// Step 3: "Turn"
-				Card tcard = deck.drawCard();
-				player1.addTableCard(tcard);
-				player2.addTableCard(tcard);
-				continueGame = processBettingRound(player2, player1, 3, false);
-				if (!continueGame) {
-					continue;
+				if (continueGame) {
+					// Step 4: "River"
+					tcard = deck.drawCard();
+					player1.addTableCard(tcard);
+					player2.addTableCard(tcard);
+					continueGame = processBettingRound(player2, player1, 4, false);
 				}
 
-				// Step 4: "River"
-				tcard = deck.drawCard();
-				player1.addTableCard(tcard);
-				player2.addTableCard(tcard);
-				continueGame = processBettingRound(player2, player1, 4, false);
-				if (!continueGame) {
-					continue;
+				if (continueGame) {
+					// Step 5: "Showdown"
+					Hand h = Util.findWinner(player1.getHand(), player2.getHand());
+					if (h == null) {
+						logger.fine("TIE!");
+						player1.processEndOfGame(ResultState.TIE);
+						player2.processEndOfGame(ResultState.TIE);
+					} else if (h.equals(player1.getHand())) {
+						processWinner(player1, player2);
+					} else {
+						processWinner(player2, player1);
+					}
 				}
 
-				// Step 5: "Showdown"
-				Hand h = Util.findWinner(player1.getHand(), player2.getHand());
-				if (h == null) {
-					logger.fine("TIE!");
-					player1.processEndOfGame(ResultState.TIE);
-					player2.processEndOfGame(ResultState.TIE);
-				} else if (h.equals(player1.getHand())) {
-					processWinner(player1, player2);
-				} else {
-					processWinner(player2, player1);
-				}
-
+				boolean player1Done = player1.isDonePlaying();
+				boolean player2Done = player2.isDonePlaying();
 				//Should we play again?
-				if ((numRuns > MAX_RUNS) || player1.isDonePlaying() || player2.isDonePlaying()) {
+				if ((numRuns > MAX_RUNS) || player1Done || player2Done) {
 					break;
 				}
 
@@ -203,22 +202,21 @@ public class Game extends Thread {
 		PlayerAction action = player1.getAction(gameState);
 		
 		//TODO: Fill details in later
-		gameState.addPlayerActionRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
+		gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
 		
 		if(action.getActionType() == ActionType.FOLD) {
 			logger.fine(player1.getName() + " folds");
 			processWinner(player2, player1);
 			return false;
 		} else if(action.getActionType() == ActionType.CHECK_OR_CALL){
-			logger.fine(player1.getName() + " checks");
-			if(!isLastPerson) {				
+			if(!isLastPerson) {
+				logger.fine(player1.getName() + " checks");
 				return processBettingRound(player2, player1, phase, true);
 			} else {
 				matchBetIfNecessary(player1, player2);
 				return true;
 			}
 		} else if(action.getActionType() == ActionType.BET_OR_RAISE) {
-			logger.fine(player1.getName() + " bets");
 			if(isLastPerson) {
 				matchBetIfNecessary(player1, player2);
 			}
@@ -267,6 +265,8 @@ public class Game extends Thread {
 		if(playerA.getPot() < playerB.getPot()) {
 			int bet = playerB.getPot() - playerA.getPot();
 			playerA.addPotByCalling(bet);
+		} else {
+			logger.fine(playerA.getName() + " checks");
 		}
 	}
 	
@@ -278,7 +278,8 @@ public class Game extends Thread {
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
 		logger.fine("Entering processWinner");
 		logger.fine(winner.getName() + " wins!");
-		gameState.addPlayerActionRecord(new PlayerActvityRecord(winner.getId(), winner.getName(), numRuns, 0, ResultState.WIN));
+		gameState.addPlayerActivityRecord(new PlayerActvityRecord(winner.getId(), winner.getName(), numRuns, 5, ResultState.WIN));
+		gameState.addPlayerActivityRecord(new PlayerActvityRecord(loser.getId(), loser.getName(), numRuns, 5, ResultState.LOSE));
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
 		

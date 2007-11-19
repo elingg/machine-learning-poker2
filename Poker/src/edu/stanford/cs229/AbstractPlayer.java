@@ -80,6 +80,10 @@ public abstract class AbstractPlayer implements Serializable {
 
 	// TODO: Make this important to call super on. How do you do that?
 	public void processEndOfGame(int resultState) {
+
+	}
+	
+	public void clearCardsAndPot() {
 		hand = new Hand();
 		pot = 0;
 	}

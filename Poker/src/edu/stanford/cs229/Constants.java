@@ -4,7 +4,7 @@ public class Constants {
 	public static String GAME_ATTRIBUTE = "game";
 	public static String NAME_PARAMETER = "name";
 	public static String ACTION_TYPE_PARAMETER = "actionType";
-	public static String IS_DONE_PLAYING_PARAMETER = "donePlaying";
+	public static String PLAY_AGAIN_PARAMETER = "playAgain";
 	public static String END_OF_GAME_PARAMETER = "isEndOfGame";
 	public static String WEB_PLAYER = "webPlayer";
 	

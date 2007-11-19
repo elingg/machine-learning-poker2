@@ -2,6 +2,7 @@ package edu.stanford.cs229;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Represents the state of a game.  I'm not sure if I have the right abstraction here.
@@ -9,7 +10,8 @@ import java.util.List;
  *
  */
 public class GameState {
-
+	Logger logger = Logger.getLogger("edu.stanford.cs229.GameState");
+	
 	private final List<AbstractPlayer> players;
 	private final List<PlayerActvityRecord> playerActivityRecords;
 	/**
@@ -29,7 +31,7 @@ public class GameState {
 		return totalPot;
 	}
 	
-	public AbstractPlayer getOpponent(String name) {
+	public AbstractPlayer getOpponent() {
 		for(AbstractPlayer player : players) {
 			if(player.getName().equals(Constants.WEBAPP_OPPONENT_NAME)) {
 				return player;
@@ -53,6 +55,9 @@ public class GameState {
 	 * @return
 	 */
 	public boolean isEndOfGame() {
+		for(PlayerActvityRecord r : playerActivityRecords) {
+			logger.info("Record: " + r.toString());
+		}
 		System.out.println("Activity Record size: " + playerActivityRecords.size());
 		System.out.println("Result state is: " + playerActivityRecords.get(playerActivityRecords.size() - 1).getResultState());
 		if(playerActivityRecords.get(playerActivityRecords.size() - 1).getResultState() > 0) {

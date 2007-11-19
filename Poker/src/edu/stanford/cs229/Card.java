@@ -93,6 +93,18 @@ public class Card implements Comparable, Serializable {
 		return "<img src=\"http://www.csse.monash.edu.au/~stevenm/texasholdem/images/cardspot_small.png\"/>";
 	}
 	
+	/**
+	 * Returns a placeholder card image.  This is for the web application.
+	 * @return
+	 */
+	public static String getHiddenCardsAsHtml() {
+		String s = "";
+		for(int i = 0; i < 2; i++) {
+		  s += "<img src=\"http://www.csse.monash.edu.au/~stevenm/texasholdem/images/back07_small.png\"/>";
+		}
+		return s;
+	}
+	
 	
 	public int compareTo(Object object) {
 		Card card = (Card) object;

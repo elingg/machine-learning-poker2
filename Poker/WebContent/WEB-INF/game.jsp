@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="edu.stanford.cs229.AbstractPlayer" %>
+<%@ page import="edu.stanford.cs229.Card" %>
 <%@ page import="edu.stanford.cs229.Constants" %>
 <%@ page import="edu.stanford.cs229.Game" %>
 <%@ page import="edu.stanford.cs229.PlayerActvityRecord" %>
@@ -7,7 +9,8 @@
 <%
 	Game game = (Game) session.getAttribute(Constants.GAME_ATTRIBUTE);
 	WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
-	Boolean isEndOfGame = (Boolean) request.getAttribute(Constants.END_OF_GAME_PARAMETER);
+	boolean isEndOfGame = game.getGameState().isEndOfGame();
+	AbstractPlayer opponent = (AbstractPlayer) game.getGameState().getOpponent();
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -17,36 +20,57 @@
 <link rel="stylesheet" href="style.css" type="text/css"/>
 </head>
 <body>
-
 <center>
 <br/>
 
+<!-- COMPUTER PLAYER -->
+<b><%=opponent.getName()%></b><br/>
+<b>Bankroll</b>: $<%=opponent.getBankroll() %> | <b>Pot</b>: <%=opponent.getPot() %><br/>
+
+
+<%if(!isEndOfGame) { %>
+  <%=Card.getHiddenCardsAsHtml() %><br/>
+<%} else {%>
+  <%=opponent.getHand().getPlayerCardsAsHtml() %>
+<%}%>
+
+
+<!-- TABLE CARDS -->
+<br/>
 <%=player.getHand().getTableCardsAsHtml() %><br/>
 <br/>
+
+<!-- HUMAN PLAYER -->
+
 <%=player.getHand().getPlayerCardsAsHtml() %><br/>
-Bankroll: $<%=player.getBankroll() %> Pot: <%=player.getPot() %><br/>
+<br/>
+<b><%=player.getName()%></b><br/>
+<b>Bankroll</b>: $<%=player.getBankroll() %> | <b>Pot</b>: <%=player.getPot() %><br/>
+
+
+<%if(!isEndOfGame) { %>
 <form action="PokerServlet" method="get">
 	<input type="submit" name="actionType" value="<%=Constants.CHECK_CALL_LABEL %>"/>
 	<input type="submit" name="actionType" value="<%=Constants.BET_RAISE_LABEL %>" />
 	<input type="submit" name="actionType" value="<%=Constants.FOLD_LABEL %>" />
 </form>
-
-<%if(isEndOfGame != null && isEndOfGame) { %>
+<%} else {%>
 <form action="PokerServlet" method="get">
-	<input type="submit" name="<%=Constants.IS_DONE_PLAYING_PARAMETER%>" value="<%=Constants.TRUE%>" />
-	<input type="submit" name="<%=Constants.IS_DONE_PLAYING_PARAMETER%>" value="<%=Constants.FALSE %>" />
+	<input type="submit" name="<%=Constants.PLAY_AGAIN_PARAMETER%>" value="Play Again" />
 </form>
-<%} %>
+<%}%>
 
-<!-- <div style="width:200px;height:300px;overflow:scroll;"> -->
+
 <%
 for(PlayerActvityRecord r : game.getGameState().getPlayerActivityRecords()) {
-%><%=r.toString()%><br/><%	
-}
+	String bgColor = "#FFCF73";
+	if(r.getPhaseNum() % 2 == 0) {
+		bgColor = "#FFA600";
+	}
 %>
+<div style="width:400px;background-color:<%=bgColor%>"><%=r.toString()%></div>
+<%}%>
 
 </center>
-
-
 </body>
 </html>

@@ -38,7 +38,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 				count++;
 				//logger.finest("Did not find action for " + name);
 				Thread.sleep(SLEEP_DELAY);
-				logger.info("Waiting");
+				logger.finest("Waiting");
 			}
 		} catch(InterruptedException e) {
 			e.printStackTrace();
@@ -52,10 +52,6 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 
 	public void setCurrentAction(PlayerAction currentAction) {
 		this.currentAction = currentAction;
-	}
-	
-	public PlayerAction getCurrectAction() {
-		return currentAction;
 	}
 
 	public boolean isTurn() {
@@ -77,7 +73,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 			while (playAgainSignal == null && count < MAX_ATTEMPTS) {
 				count++;
 				Thread.sleep(SLEEP_DELAY);
-				logger.info("Waiting");
+				logger.finest("Waiting");
 			}
 			playAgainSignal = null;
 			isTurnSignal = false;

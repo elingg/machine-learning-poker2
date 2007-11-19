@@ -9,7 +9,7 @@ package edu.stanford.cs229;
  */
 public class PlayerAction {
 	private final int actionType;
-	private final int bet;
+	private int bet;
 	
 	public PlayerAction(int actionType, int bet) {
 		this.actionType = actionType;
@@ -22,5 +22,13 @@ public class PlayerAction {
 
 	public int getBet() {
 		return bet;
+	}
+	
+	/**
+	 * Used by game engine only
+	 * @param bet
+	 */
+	public void overrideBet(int bet) {
+		this.bet = bet;
 	}
 }

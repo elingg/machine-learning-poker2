@@ -59,7 +59,7 @@ public abstract class AbstractPlayer implements Serializable {
 	}
 
 	public int getBankroll() {
-		return bankroll;
+		return bankroll - pot;
 	}
 
 	public void adjustBankroll(int i) {

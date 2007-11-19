@@ -149,8 +149,8 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht)
 	{
 		float FOLDING_THRESHOLD = -10;
-		float CHECKING_THRESHOLD = 10;
-		int NUM_GAMES_ALWAYS_CHECK = 50000;  //always check a min number of games so that our player can leanr
+		float CHECKING_THRESHOLD = 28;
+		int NUM_GAMES_ALWAYS_CHECK = 50000;  //always check a min number of games so that our player can learn
 		//logger.fine(Integer.toString(Util.computeValue(this.hand)));
 		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), this.getPot()*2);
 		logger.fine(this.getName() + " expected value for checking: " + exp);
@@ -159,8 +159,9 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		float ev= Math.max(exp, expbet);
 		if(ev < FOLDING_THRESHOLD && numGames>NUM_GAMES_ALWAYS_CHECK)
 			return new PlayerAction(ActionType.FOLD, 0);
-		else if((Math.abs(ev-exp) < CHECKING_THRESHOLD) || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
-			return new PlayerAction(ActionType.CHECK_OR_CALL,0);
+		//else if((Math.abs(ev-exp) < CHECKING_THRESHOLD) || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
+		else if(expbet <= CHECKING_THRESHOLD || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
+		return new PlayerAction(ActionType.CHECK_OR_CALL,0);
 		else {
 			betCountMaxForEachGame++;
 			return new PlayerAction(ActionType.BET_OR_RAISE,10);

@@ -150,9 +150,7 @@ public class Game extends Thread {
 					// Step 5: "Showdown"
 					Hand h = Util.findWinner(player1.getHand(), player2.getHand());
 					if (h == null) {
-						logger.fine("TIE!");
-						player1.processEndOfGame(ResultState.TIE);
-						player2.processEndOfGame(ResultState.TIE);
+						processTie(players);
 					} else if (h.equals(player1.getHand())) {
 						processWinner(player1, player2);
 					} else {
@@ -204,73 +202,47 @@ public class Game extends Thread {
 		
 		PlayerAction action = player1.getAction(gameState);
 		
-		//TODO: Fill details in later
-		gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
-		
 		if(action.getActionType() == ActionType.FOLD) {
-			logger.fine(player1.getName() + " folds");
+			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
 			processWinner(player2, player1);
 			return false;
-		} else if(action.getActionType() == ActionType.CHECK_OR_CALL){
-			if(!isLastPerson) {
-				logger.fine(player1.getName() + " checks");
-				return processBettingRound(player2, player1, phase, true);
+		}		
+
+		if(action.getActionType() == ActionType.CHECK_OR_CALL){
+			//If there is a difference between the player pots, then this is a call.  Otherwise, it is a check.
+			if(player1.getPot() < player2.getPot()) {
+				int bet = player2.getPot() - player1.getPot();
+				action.overrideBet(bet);	
+				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
+				player1.addPotByCalling(bet);
 			} else {
-				matchBetIfNecessary(player1, player2);
+				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
+			}
+			
+			if(!isLastPerson) {
+				return processBettingRound(player2, player1, phase, true);
+			} else {				
 				return true;
 			}
-		} else if(action.getActionType() == ActionType.BET_OR_RAISE) {
-			if(isLastPerson) {
-				matchBetIfNecessary(player1, player2);
-			}
+		} 
+		
+		if(action.getActionType() == ActionType.BET_OR_RAISE) {
+			//If there is a different between the player pots, then they must call first.  Then they can raise.
+			if(player1.getPot() < player2.getPot()) {
+				int bet = player2.getPot() - player1.getPot();
+				PlayerAction call = new PlayerAction(ActionType.CHECK_OR_CALL, bet);
+				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, call));
+				player1.addPotByCalling(bet);
+			} 
+			
+			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
 			player1.addPotByBetting(action.getBet());
 			return processBettingRound(player2, player1, phase, true);
 		}
+		
 		throw new RuntimeException("PLAYER ENTERED BETTING ROUND WITHOUT AN ACTION");
 	}
 	
-	/**
-	 * Betting part 2
-	 * @param playerA
-	 * @param playerB
-	 * @param state
-	 * @return
-	 * @throws ApplicationException
-	 * TODO: There is a lot of redundant code between this and processBettingRound
-	 */
-	/*
-	private boolean processBettingRound2(AbstractPlayer playerA, AbstractPlayer playerB, int phase) throws ApplicationException {
-		PlayerAction action = playerA.getAction(gameState);
-		if(action.getActionType() == ActionType.FOLD) {
-			logger.fine(playerA.getName() + " folds");
-			processWinner(playerB, playerA);
-			return false;
-		} else if(action.getActionType() == ActionType.CHECK_CALL){
-			matchBetIfNecessary(playerA, playerB); //diff
-			return true;  //diff
-		} else if(action.getActionType() == ActionType.BET_RAISE) {
-			matchBetIfNecessary(playerA, playerB);  //diff
-			playerA.addPotByBetting(action.getBet());
-			return processBettingRound2(playerB, playerA, phase);
-		}
-		//TODO refactor this:
-		return false;
-	}
-	*/
-	
-	/**
-	 * Player A must match Player B's bet
-	 * @param playerA
-	 * @param playerB
-	 */
-	private void matchBetIfNecessary(AbstractPlayer playerA, AbstractPlayer playerB) {
-		if(playerA.getPot() < playerB.getPot()) {
-			int bet = playerB.getPot() - playerA.getPot();
-			playerA.addPotByCalling(bet);
-		} else {
-			logger.fine(playerA.getName() + " checks");
-		}
-	}
 	
 	/**
 	 * Process the winner
@@ -278,8 +250,6 @@ public class Game extends Thread {
 	 * @param loser
 	 */
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
-		logger.fine("Entering processWinner");
-		logger.fine(winner.getName() + " wins!");
 		gameState.addPlayerActivityRecord(new PlayerActvityRecord(winner.getId(), winner.getName(), numRuns, 5, ResultState.WIN));
 		gameState.addPlayerActivityRecord(new PlayerActvityRecord(loser.getId(), loser.getName(), numRuns, 5, ResultState.LOSE));
 		winner.adjustBankroll(loser.getPot());
@@ -287,6 +257,14 @@ public class Game extends Thread {
 		
 		winner.processEndOfGame(ResultState.WIN);
 		loser.processEndOfGame(ResultState.LOSE);
+	}
+	
+	private void processTie(List<AbstractPlayer> players) {
+		for(AbstractPlayer p : players) {
+			p.processEndOfGame(ResultState.TIE);
+			gameState.addPlayerActivityRecord(new PlayerActvityRecord(p.getId(), p.getName(), numRuns, 5, ResultState.TIE));
+		}
+		
 	}
 
 	/**

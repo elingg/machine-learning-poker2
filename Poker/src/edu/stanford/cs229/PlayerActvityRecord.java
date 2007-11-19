@@ -1,11 +1,14 @@
 package edu.stanford.cs229;
 
+import java.util.logging.Logger;
+
 /***
  * Represents an "activity record" for a player
  * @author ago
  *
  */
 public class PlayerActvityRecord {
+	Logger logger = Logger.getLogger("edu.stanford.cs229.PlayerActivityRecord");
 	private final int playerId;
 	private final String name;
 	private final int gameNum;
@@ -22,9 +25,11 @@ public class PlayerActvityRecord {
 		this.gameNum = gameNum;
 		this.phaseNum = phaseNum;
 		this.playerAction = playerAction;
+		logger.fine(this.toString());
 	}
 	
 	public PlayerActvityRecord (int playerId, String name, int gameNum, int phaseNum, int resultState) {
+		
 		this.playerId = playerId;
 		this.name = name;
 		this.gameNum = gameNum;

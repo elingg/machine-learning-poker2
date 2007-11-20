@@ -78,9 +78,8 @@ public abstract class AbstractPlayer implements Serializable {
 		hand.addPlayerCard(card);
 	}
 
-	public void clearCardsAndPot() {
+	public void clearCards() {
 		hand = new Hand();
-		pot = 0;
 	}
 	
 	/**
@@ -104,6 +103,8 @@ public abstract class AbstractPlayer implements Serializable {
 	
 	public void debugResults() {}
 	
-	public void processEndOfGame(int resultState) { }
+	public void processEndOfGame(int resultState) {
+		pot = 0;
+	}
 	
 }

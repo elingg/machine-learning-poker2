@@ -18,9 +18,17 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 	int SLEEP_DELAY = 500; //in ms
 	int MAX_ATTEMPTS = 1000;
 	
+	// Signal (web app -> game engine) to let the game engine know the player
+	// wants to play again
 	private String playAgainSignal = null;
-	private PlayerAction currentAction = null;  //Signal: to let the Game thread know about the player's decision 
-	private boolean isTurnSignal;  //Signal used to let the Servlet know that it should show the page to the user
+
+	// Signal (web app -> game engine) to let the Game thread know about the
+	// player's decision
+	private PlayerAction currentAction = null;
+
+	// Signal (game engine -> web app) to let the Servlet know that it should
+	// show the page to the user
+	private boolean isTurnSignal;  
 	
 	public WebPlayer(String name) {
 		super(name);
@@ -81,8 +89,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return false;
-		}
-		
+		}		
 	}
 
 	

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  * 
  */
 public class Deck {
-	Logger logger = Logger.getLogger("edu.stanford.cs229.Deck");
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Deck");
 
 	private final int NUM_DECKS = 1; // Number of decks
 

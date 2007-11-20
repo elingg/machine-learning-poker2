@@ -8,7 +8,7 @@ import java.util.logging.Logger;
  *
  */
 public class PlayerActvityRecord {
-	Logger logger = Logger.getLogger("edu.stanford.cs229.PlayerActivityRecord");
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.PlayerActivityRecord");
 	private final int playerId;
 	private final String name;
 	private final int gameNum;
@@ -17,7 +17,6 @@ public class PlayerActvityRecord {
 	private int responseTime;
 	private PlayerAction playerAction;
 	private int resultState;
-	
 	
 	public PlayerActvityRecord (int playerId, String name, int gameNum, int phaseNum, PlayerAction playerAction) {
 		this.playerId = playerId;
@@ -29,14 +28,18 @@ public class PlayerActvityRecord {
 	}
 	
 	public PlayerActvityRecord (int playerId, String name, int gameNum, int phaseNum, int resultState) {
-		
 		this.playerId = playerId;
 		this.name = name;
 		this.gameNum = gameNum;
 		this.phaseNum = phaseNum;
 		this.resultState = resultState;
+		logger.fine(this.toString());
 	}
 	
+	/**
+	 * Prints a string version of the activity record. This is used in the HTML
+	 * version
+	 */
 	public String toString() {
 		if (playerAction != null) {
 			String amountString = "";
@@ -49,7 +52,11 @@ public class PlayerActvityRecord {
 			if (playerAction.getActionType() == ActionType.BET_OR_RAISE)
 				return name + " bets/raises " + amountString;
 			if (playerAction.getActionType() == ActionType.CHECK_OR_CALL)
-				return name + " checks/calls " + amountString;
+				if(amount > 0) {
+					return name + " calls " + amountString;
+				} else {
+					return name + " checks";
+				}
 		} else {
 			if (resultState == ResultState.WIN) {
 				return "<b>" + name + " wins!</b>";
@@ -87,5 +94,13 @@ public class PlayerActvityRecord {
 
 	public int getResultState() {
 		return resultState;
+	}
+
+	public Hand getHand() {
+		return hand;
+	}
+
+	public int getResponseTime() {
+		return responseTime;
 	}
 }

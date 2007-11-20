@@ -78,11 +78,6 @@ public abstract class AbstractPlayer implements Serializable {
 		hand.addPlayerCard(card);
 	}
 
-	// TODO: Make this important to call super on. How do you do that?
-	public void processEndOfGame(int resultState) {
-
-	}
-	
 	public void clearCardsAndPot() {
 		hand = new Hand();
 		pot = 0;
@@ -94,7 +89,6 @@ public abstract class AbstractPlayer implements Serializable {
 	 * @return
 	 */
 	public boolean isDonePlaying() {
-		logger.info("Base: isDonePlaying");
 		return false;
 	}
 
@@ -106,8 +100,10 @@ public abstract class AbstractPlayer implements Serializable {
 		return s;
 	}
 
-	public abstract PlayerAction getAction(GameState state)
-			throws ApplicationException;
+	public abstract PlayerAction getAction(GameState state) throws ApplicationException;
 	
+	public void debugResults() {}
+	
+	public void processEndOfGame(int resultState) { }
 	
 }

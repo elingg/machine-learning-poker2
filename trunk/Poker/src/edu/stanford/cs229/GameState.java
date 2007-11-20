@@ -56,10 +56,9 @@ public class GameState {
 	 */
 	public boolean isEndOfGame() {
 		for(PlayerActvityRecord r : playerActivityRecords) {
-			logger.info("Record: " + r.toString());
+			logger.fine("Record: " + r.toString());
 		}
-		System.out.println("Activity Record size: " + playerActivityRecords.size());
-		System.out.println("Result state is: " + playerActivityRecords.get(playerActivityRecords.size() - 1).getResultState());
+
 		if(playerActivityRecords.get(playerActivityRecords.size() - 1).getResultState() > 0) {
 			return true;
 		} else {

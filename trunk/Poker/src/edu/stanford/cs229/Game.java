@@ -167,8 +167,10 @@ public class Game extends Thread {
 					break;
 				}
 				
-				player1.clearCardsAndPot();
-				player2.clearCardsAndPot();
+				// Clear hands need to be called after isDonePlaying().
+				// Otherwise, the cards will not appear correctly in the webapp
+				player1.clearCards();
+				player2.clearCards();
 			}
 
 			logger.info("End of game results");
@@ -359,17 +361,19 @@ public class Game extends Thread {
 		gameState.addPlayerActivityRecord(new PlayerActvityRecord(loser.getId(), loser.getName(), numRuns, 5, ResultState.LOSE));
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
-		
 		winner.processEndOfGame(ResultState.WIN);
 		loser.processEndOfGame(ResultState.LOSE);
 	}
 	
+	/**
+	 * Processes a tie
+	 * @param players
+	 */
 	private void processTie(List<AbstractPlayer> players) {
 		for(AbstractPlayer p : players) {
 			p.processEndOfGame(ResultState.TIE);
 			gameState.addPlayerActivityRecord(new PlayerActvityRecord(p.getId(), p.getName(), numRuns, 5, ResultState.TIE));
-		}
-		
+		}		
 	}
 
 	/**

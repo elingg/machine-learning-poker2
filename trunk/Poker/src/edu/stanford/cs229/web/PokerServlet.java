@@ -63,7 +63,7 @@ import edu.stanford.cs229.RandomPlayer;
 			//Wait until the game is ready for the player's next action
 			while (true) {
 				logger.finest("Waiting");
-				Thread.sleep(1000);  //this value needs to be higher than the WebPlayer threshold.
+				Thread.sleep(1000);  //this value needs to be 2x higher than the WebPlayer threshold.
 				if (player.isTurn()) {
 					break;
 				}

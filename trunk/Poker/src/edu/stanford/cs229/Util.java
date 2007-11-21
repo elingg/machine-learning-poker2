@@ -6,8 +6,8 @@ public class Util {
 	static final int straightflush=800;
 	static final int fourkind=700;
 	static final int fullhouse=600;
-	static final int straight=500;
-	static final int flush=400;
+	static final int flush=500;
+	static final int straight=400;
 	static final int threekind=300;
 	static final int twopair=200;
 	static final int pair=100;
@@ -43,13 +43,13 @@ public class Util {
 		} else if (hand.isFullHouse() != null) {
 			hand.setValue(fullhouse);
 			return hand.isFullHouse();
+		}else if (hand.isFlush() != null) {
+				hand.setValue(flush);
+				return hand.isFlush();	
 		} else if (hand.isStraight() != null) {
 			hand.setValue(straight);
 			return hand.isStraight();
-		} else if (hand.isFlush() != null) {
-			hand.setValue(flush);
-			return hand.isFlush();
-		} else if (hand.isThreeKind() != null) {
+		}  else if (hand.isThreeKind() != null) {
 			hand.setValue(threekind);
 			return hand.isThreeKind();
 		} else if (hand.isTwoPair() != null) {
@@ -81,7 +81,14 @@ public class Util {
 		int handval;
 		
 		if (hand.getValue() == -1) {
-			handval = findHighCardValue(hand.getPlayerCards());
+			if(hand.getAllCards().size()>5)
+			{
+				List<Card> h= hand.getAllCards().subList(hand.getAllCards().size()-5, hand.getAllCards().size());
+				handval = findHighCardValue(h);
+			}
+			else
+				handval= findHighCardValue(hand.getAllCards());
+			
 		} else
 			handval=hand.getValue() + findHighCardValue(findBestCards(hand));
 		return handval;

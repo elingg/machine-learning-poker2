@@ -95,6 +95,11 @@ public class Game extends Thread {
 				deck.shuffleDeck();
 				gameState = new GameState(players);
 				
+				// Clear hands need to be called after isDonePlaying().
+				// Otherwise, the cards will not appear correctly in the webapp
+				player1.clearCards();
+				player2.clearCards();
+				
 				logger.info("Round #: " + numRuns);
 
 				logger.fine("\nStarting new game!");
@@ -167,10 +172,6 @@ public class Game extends Thread {
 					break;
 				}
 				
-				// Clear hands need to be called after isDonePlaying().
-				// Otherwise, the cards will not appear correctly in the webapp
-				player1.clearCards();
-				player2.clearCards();
 			}
 
 			logger.info("End of game results");

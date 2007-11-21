@@ -153,14 +153,14 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		int NUM_GAMES_ALWAYS_CHECK = 50000;  //always check a min number of games so that our player can learn
 		//logger.fine(Integer.toString(Util.computeValue(this.hand)));
 		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), this.getPot()*2);
-		logger.fine(this.getName() + " expected value for checking: " + exp);
 		float expbet= findExpectedValue(Util.computeValue(this.hand), ht, this.getPot()+10, (this.getPot()+10)*2);
-		logger.fine(this.getName() + " expected value for betting: " + expbet);
 		float ev= Math.max(exp, expbet);
 		if(ev < FOLDING_THRESHOLD && numGames>NUM_GAMES_ALWAYS_CHECK)
 			return new PlayerAction(ActionType.FOLD, 0);
 		//else if((Math.abs(ev-exp) < CHECKING_THRESHOLD) || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
-		else if(expbet <= CHECKING_THRESHOLD || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
+		//else if(expbet <= CHECKING_THRESHOLD || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
+		
+		else if(exp<=.9 || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
 		return new PlayerAction(ActionType.CHECK_OR_CALL,0);
 		else {
 			betCountMaxForEachGame++;
@@ -173,7 +173,8 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		Fraction val=(Fraction)state.get(key);
 		float prob= ((float)val.getNumerator()/(float)val.getDenominator());
 		
-		return (amtWin*(prob) - amtLose*(1-prob));
+		//return (amtWin*(prob) - amtLose*(1-prob));
+		return prob;
 	}
 	
 	/**

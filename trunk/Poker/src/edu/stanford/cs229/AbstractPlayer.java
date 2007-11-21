@@ -5,8 +5,20 @@ import java.util.logging.Logger;
 
 /**
  * This is a base class that represents a player. All players (e.g. HumanPlayer,
- * ReinforcementLearningPlayer, etc.) should extend this class.  The game engine
+ * ReinforcementLearningPlayer, etc.) should extend this class. The game engine
  * calls these funcitons directly.
+ * 
+ * There are several "hooks" that your player can have into the game engine. The
+ * ones you will probably want to use are:
+ * <ul>
+ * <li>getAction - this is how the player indicates a fold, check/call, and
+ * bet/raise</li>
+ * <li>processEndOfGame - this is called at the end of a game. This will give
+ * you an indication if your player won or loss</li>
+ * <li>debugResults - this is called right before the program ends. This is
+ * useful for debugging purposes</li>
+ * <li></li>
+ * </ul>
  * 
  * @author ago
  * 

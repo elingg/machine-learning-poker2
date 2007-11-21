@@ -81,7 +81,7 @@ public class Util {
 		int handval;
 		
 		if (hand.getValue() == -1) {
-			handval = findHighCardValue(hand.getAllCards());
+			handval = findHighCardValue(hand.getPlayerCards());
 		} else
 			handval=hand.getValue() + findHighCardValue(findBestCards(hand));
 		return handval;

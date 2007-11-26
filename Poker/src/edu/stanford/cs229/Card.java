@@ -26,7 +26,7 @@ public class Card implements Comparable, Serializable {
 	}
 
 	public String toString() {
-		return value + "," + suit;
+		return value + ";" + suit;
 	}
 
 	public boolean equals(Card c) {

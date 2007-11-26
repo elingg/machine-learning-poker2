@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 /**
  * Represents a human player that will be playing through the Java console
  * @author ago
- * TODO: Rename to HumanPlayer.java
+ * 
  */
 public class HumanPlayer extends AbstractPlayer {
 
@@ -21,17 +21,13 @@ public class HumanPlayer extends AbstractPlayer {
 			BufferedReader stdin = new BufferedReader(isr);
 			
 			while (true) {
-				System.out.print("(c)heck/(f)old/(b)et?");
+				System.out.print("(c)heck or call/(f)old/(b)et or raise?");
 				String actionType = stdin.readLine();
 				if (actionType.indexOf("c") != -1) {
 					return new PlayerAction(ActionType.CHECK_OR_CALL, -1);
 				} else if (actionType.indexOf("b") != -1) {
-					/* Uncomment the following to allow players to bet an amount
 					System.out.println("How much?");
 					int bet = Integer.parseInt(stdin.readLine());
-					*/					
-					//For now, we always bet $10
-					int bet = 10;
 					return new PlayerAction(ActionType.BET_OR_RAISE, bet);
 				} else if (actionType.indexOf("f") != -1) {
 					return new PlayerAction(ActionType.FOLD, -1);

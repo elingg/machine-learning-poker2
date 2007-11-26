@@ -27,7 +27,9 @@ public abstract class AbstractPlayer implements Serializable {
 	public static Logger logger = Logger
 			.getLogger("edu.stanford.cs229.AbstractPlayer");
 
-	protected final String name;
+	private final String id;
+	
+	private final String name;
 
 	protected Hand hand;
 
@@ -38,71 +40,87 @@ public abstract class AbstractPlayer implements Serializable {
 	public AbstractPlayer(String name) {
 		hand = new Hand();
 		this.name = name;
+		this.id = name + "-" + System.currentTimeMillis();
 	}
 	
-	public int getId() {
-		return 0;
+	public AbstractPlayer(String name, String id) {
+		hand = new Hand();
+		this.name = name;
+		this.id = id;
+	}
+	
+	/**
+	 * Returns the ID of the player. This is important for human players. This
+	 * will either be the IP address of the user, or the Facebook ID of the
+	 * player.
+	 * 
+	 * @return
+	 */
+	public String getId() {
+		return id;
 	}
 
+	/**
+	 * Returns the name of the player.
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Returns the hand of the player. 
+	 * @return
+	 */
 	public Hand getHand() {
 		return hand;
 	}
 
+	/**
+	 * Returns the amount of money the player has put into the pot for this round
+	 * @return
+	 */
 	public int getPot() {
 		return pot;
 	}
 
-	public void addPotByBetting(int pot) {
-		logger.fine(name + " bets $" + pot);
-		this.pot += pot;
-	}
-
-	public void addPotByCalling(int pot) {
-		logger.fine(name + " calls $" + pot);
-		this.pot += pot;
-	}
-
-	public void addPotByBlind(int amount) {
+	/**
+	 * Adds money to this players pot.  This is used by the game engine only.
+	 * @param amount
+	 */
+	void addPot(int amount) {
 		this.pot += amount;
 	}
 
+	/**
+	 * Returns the bankroll of the player. This takes into account how much the
+	 * player has added to the pot already.
+	 * 
+	 * @return
+	 */
 	public int getBankroll() {
 		return bankroll - pot;
 	}
 
-	public void adjustBankroll(int i) {
+	/**
+	 * Adjusts the bankroll of the player.  
+	 * @param i The amount to adjust the bankroll.  The amount is always added.
+	 */
+	void adjustBankroll(int i) {
 		bankroll += i;
 	}
-
-	public void addTableCard(Card card) {
-		logger.finest("Table received card:" + card.getSuit() + ","
-				+ card.getValue());
-		hand.addTableCard(card);
-	}
-
-	public void addPlayerCard(Card card) {
-		logger.finest("Player received card:" + card.getSuit() + ","
-				+ card.getValue());
-		hand.addPlayerCard(card);
-	}
-
-	public void clearCards() {
+	
+	/**
+	 * Clears the player cards.  This needs to be called for each game round.
+	 *
+	 */
+	void clearCards() {
 		hand = new Hand();
 	}
 	
 	/**
-	 * Called at the end of each game, to see if player wants to continue playing.
-	 * This is needed when a human is playing (i.e. HumanPlayer or WebPlayer)
-	 * @return
+	 * Prints out a player's hand.
 	 */
-	public boolean isDonePlaying() {
-		return false;
-	}
-
 	public String toString() {
 		String s = "";
 		for (Card c : hand.getPlayerCards()) {
@@ -111,12 +129,59 @@ public abstract class AbstractPlayer implements Serializable {
 		return s;
 	}
 
+	/**
+	 * Adds a table card to the player. If you override this, make sure you call
+	 * super.addTableCard() on this.
+	 * 
+	 * @param card
+	 */
+	public void addTableCard(Card card) {
+		logger.finest("Table received card:" + card.getSuit() + ","
+				+ card.getValue());
+		hand.addTableCard(card);
+	}
+
+	/**
+	 * Adds a player card. If you override this, make sure you call
+	 * super.addPlayerCard()
+	 * 
+	 * @param card
+	 */
+	public void addPlayerCard(Card card) {
+		logger.finest("Player received card:" + card.getSuit() + ","
+				+ card.getValue());
+		hand.addPlayerCard(card);
+	}
+	
+	/**
+	 * Requests action from the player
+	 * @param state
+	 * @return
+	 * @throws ApplicationException
+	 */
 	public abstract PlayerAction getAction(GameState state) throws ApplicationException;
 	
-	public void debugResults() {}
-	
+
+	/**
+	 * Called after a game round ends
+	 * @param resultState
+	 * TODO:  Rename this to "processEndOfRound"
+	 */
 	public void processEndOfGame(int resultState) {
 		pot = 0;
 	}
+
+	/**
+	 * Called at the end of each game, to see if player wants to continue playing.
+	 * This is needed when a human is playing (i.e. HumanPlayer or WebPlayer)
+	 * @return
+	 */
+	public boolean isDonePlaying() {
+		return false;
+	}
 	
+	/**
+	 * Called when the application ends.
+	 */
+	public void debugResults() {}
 }

@@ -4,13 +4,16 @@
 <%@ page import="edu.stanford.cs229.Card" %>
 <%@ page import="edu.stanford.cs229.Constants" %>
 <%@ page import="edu.stanford.cs229.Game" %>
-<%@ page import="edu.stanford.cs229.PlayerActvityRecord" %>
+<%@ page import="edu.stanford.cs229.PlayerActivityRecord" %>
 <%@ page import="edu.stanford.cs229.web.WebPlayer" %>
 <%
+	//P3P headers to allow this to work in IE7
+	response.setHeader("P3P","CP='NOI DSP NID TAIo PSAa OUR IND UNI OTC TST'");
 	Game game = (Game) session.getAttribute(Constants.GAME_ATTRIBUTE);
 	WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
 	boolean isEndOfGame = game.getGameState().isEndOfGame();
-	AbstractPlayer opponent = (AbstractPlayer) game.getGameState().getOpponent();
+	AbstractPlayer opponent = (AbstractPlayer) game.getGameState().getOpponent(player);
+	
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -25,44 +28,58 @@
 
 <!-- COMPUTER PLAYER -->
 <b><%=opponent.getName()%></b><br/>
-<b>Bankroll</b>: $<%=opponent.getBankroll() %> | <b>Pot</b>: <%=opponent.getPot() %><br/>
+<b>Bankroll</b>: $<%=opponent.getBankroll()%> | <b>Pot</b>: <%=opponent.getPot()%><br/>
 
 
-<%if(!isEndOfGame) { %>
-  <%=Card.getHiddenCardsAsHtml() %><br/>
-<%} else {%>
-  <%=opponent.getHand().getPlayerCardsAsHtml() %>
-<%}%>
+<%
+if(!isEndOfGame) {
+%>
+  <%=Card.getHiddenCardsAsHtml()%><br/>
+<%
+} else {
+%>
+  <%=opponent.getHand().getPlayerCardsAsHtml()%>
+<%
+}
+%>
 
 
 <!-- TABLE CARDS -->
 <br/>
-<%=player.getHand().getTableCardsAsHtml() %><br/>
+<%=player.getHand().getTableCardsAsHtml()%><br/>
 <br/>
 
 <!-- HUMAN PLAYER -->
 
-<%=player.getHand().getPlayerCardsAsHtml() %><br/>
+<%=player.getHand().getPlayerCardsAsHtml()%><br/>
 <br/>
 <b><%=player.getName()%></b><br/>
-<b>Bankroll</b>: $<%=player.getBankroll() %> | <b>Pot</b>: <%=player.getPot() %><br/>
+<b>Bankroll</b>: $<%=player.getBankroll()%> | <b>Pot</b>: <%=player.getPot()%><br/>
 
 
-<%if(!isEndOfGame) { %>
+<%
+if(!isEndOfGame) {
+%>
 <form action="PokerServlet" method="get">
 	<input type="submit" name="actionType" value="<%=Constants.CHECK_CALL_LABEL %>"/>
 	<input type="submit" name="actionType" value="<%=Constants.BET_RAISE_LABEL %>" />
 	<input type="submit" name="actionType" value="<%=Constants.FOLD_LABEL %>" />
+	<br/>
+	Bet/Raise Amount: <input type="text" size="2" name="<%=Constants.BET_PARAMETER %>" value="10" />
 </form>
-<%} else {%>
+<%
+} else {
+%>
 <form action="PokerServlet" method="get">
 	<input type="submit" name="<%=Constants.PLAY_AGAIN_PARAMETER%>" value="Play Again" />
 </form>
-<%}%>
+<%
+}
+%>
 
 
 <%
-for(PlayerActvityRecord r : game.getGameState().getPlayerActivityRecords()) {
+	for(PlayerActivityRecord r : game.getGameState().getPlayerActivityRecords()) {
 	String bgColor = "#FFCF73";
 	if(r.getPhaseNum() % 2 == 0) {
 		bgColor = "#FFA600";
@@ -72,5 +89,13 @@ for(PlayerActvityRecord r : game.getGameState().getPlayerActivityRecords()) {
 <%}%>
 
 </center>
+
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-3089908-1";
+urchinTracker();
+</script>
+
 </body>
 </html>

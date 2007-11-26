@@ -39,7 +39,7 @@ public class RandomPlayer extends AbstractPlayer{
 		this.foldPercent = foldPercent;
 		this.checkOrCallPercent = checkOrCallPercent;
 		this.betOrRaisePercent = betOrRaisePercent;
-		this.numRuns = numRuns;
+		this.maxRuns = maxRuns;
 	}
 
 	

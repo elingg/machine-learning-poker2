@@ -20,7 +20,8 @@ public class Util {
 
 	public static int findHighCardValue(List<Card> cardList)
 	{		
-		if(cardList!=null)
+		//TODO: Elizabeth, is it okay if I add a size check here?
+		if(cardList!=null && cardList.size() > 0)
 		{
 			Collections.sort(cardList);
 			return cardList.get(cardList.size()-1).getValue();

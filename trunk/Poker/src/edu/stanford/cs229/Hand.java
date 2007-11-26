@@ -5,11 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Represents a hand that may be held by a player.  It also provides functions for checking
- * if a hand is a certain type (i.e. two pair, three pair).
+ * Represents a hand that may be held by a player. It also provides functions
+ * for checking if a hand is a certain type (i.e. two pair, three pair).
  * 
- * The hand contains multiple lists to help keep track of player cards vs. table cards.
- *
+ * The hand contains multiple lists to help keep track of player cards vs. table
+ * cards.
+ * 
  */
 public class Hand implements Serializable {
 	private List<Card> playerCards;
@@ -24,6 +25,18 @@ public class Hand implements Serializable {
 		playerCards = new ArrayList<Card>();
 		tableCards = new ArrayList<Card>();
 		allCards = new ArrayList<Card>();
+	}
+	
+	public String toString() {
+		String s = "T:";
+		for(Card c : tableCards) {
+			s += "[" + c.toString() + "]";
+		}
+		s += " P:";
+		for(Card c : playerCards) {
+			s += "[" + c.toString() + "]";
+		}
+		return s;
 	}
 
 	public List<Card> getTableCards() {

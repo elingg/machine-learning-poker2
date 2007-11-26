@@ -16,13 +16,15 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
 /**
  * Represents a Texas Hold'em Game. This is currently only for 2 player. In the
- * future, it may be extended to 3 players.
+ * future, it may be extended to more players (if we have time).
  * 
  * @author ago
  * 
  */
 public class Game extends Thread {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
+	
+	/* START OF CONFIGURATION SETTINGS */
 	
 	//Interactive mode
 	private final static boolean INTERACTIVE_MODE = false;
@@ -31,7 +33,11 @@ public class Game extends Thread {
 	private final static boolean RESTORE_PLAYERS = false;  
 	
 	//Number of games to be played
-	private final static int MAX_RUNS = 10;
+	private final static int MAX_RUNS = 100000;
+	
+	private final static int BLIND_AMOUNT = 5; 
+	
+	/* END OF CONFIGURATION SETTINGS */
 	
 	private int numRuns = 0; // number of rounds to be played
 
@@ -39,10 +45,26 @@ public class Game extends Thread {
 
 	private GameState gameState;
 
-	private final Deck deck = new Deck();
+	private final Deck deck;
 
+	/**
+	 * Initializes a game
+	 * @param players
+	 */
 	public Game(List<AbstractPlayer> players) {
 		this.players = players;
+		this.deck = new Deck();
+	}
+	
+	/**
+	 * Initializes a game, using a fake deck. This is for testing purposes only.
+	 * 
+	 * @param players
+	 * @param fakeDeck
+	 */
+	Game(List<AbstractPlayer> players, Deck fakeDeck) {
+		this.players = players;
+		this.deck = fakeDeck;		
 	}
 	
 	/**
@@ -52,7 +74,7 @@ public class Game extends Thread {
 	 */
 	public static void main(String[] args) throws ApplicationException {
 		//Set up the logging config
-		//TODO: The following doesn't work.
+		//TODO: Fix the following.
 		System.setProperty("java.util.logging.config.file", "logging.properties");
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
@@ -69,7 +91,7 @@ public class Game extends Thread {
 			players.add(player2);
 		} else {
 			ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
-			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Alec");
+			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Computer");
 			players.add(player1);
 			players.add(player2);
 		}
@@ -80,8 +102,7 @@ public class Game extends Thread {
 	
 	/**
 	 * Runs the game. Currently only 2 players are supported, but is could be
-	 * possibly expanded to multiple players. The first player in the array list
-	 * is the dealer.
+	 * possibly expanded to multiple players. 
 	 * 
 	 * @throws ApplicationException
 	 */
@@ -89,89 +110,26 @@ public class Game extends Thread {
 		try {
 			AbstractPlayer player1 = players.get(0);
 			AbstractPlayer player2 = players.get(1);
-
+			
 			while (true) {
 				numRuns++;
-				deck.shuffleDeck();
-				gameState = new GameState(players);
 				
-				// Clear hands need to be called after isDonePlaying().
-				// Otherwise, the cards will not appear correctly in the webapp
-				player1.clearCards();
-				player2.clearCards();
+				//Alternate which player goes first
+				if(numRuns % 2 == 0) {
+					runGameRound(player2, player1);
+				} else {
+					runGameRound(player1, player2);
+				}
 				
-				logger.info("Round #: " + numRuns);
-
-				logger.fine("\nStarting new game!");
-				logger.fine(player1.getName() + " has $" + player1.getBankroll());
-				logger.fine(player2.getName() + " has $" + player2.getBankroll());
-				
-				//Need a boolean to decide to continue game.  This is set to false whenever somebody folds.
-				boolean continueGame = true;
-
-				// Step 0: Blinds
-				player1.addPotByBlind(5);
-				player2.addPotByBlind(5);
-
-				// Step 1: "Pre-flop"
-				player1.addPlayerCard(deck.drawCard());
-				player1.addPlayerCard(deck.drawCard());
-				player2.addPlayerCard(deck.drawCard());
-				player2.addPlayerCard(deck.drawCard());
-				continueGame = processBettingRound(player1, player2, 1);
-
-				if (continueGame) {
-					// Step 2: "Flop"
-					Card tcard1 = deck.drawCard();
-					Card tcard2 = deck.drawCard();
-					Card tcard3 = deck.drawCard();
-					player1.addTableCard(tcard1);
-					player1.addTableCard(tcard2);
-					player1.addTableCard(tcard3);
-					player2.addTableCard(tcard1);
-					player2.addTableCard(tcard2);
-					player2.addTableCard(tcard3);
-					continueGame = processBettingRound(player1, player2, 2);
-				}
-
-				Card tcard;
-				if (continueGame) {
-					// Step 3: "Turn"
-					tcard = deck.drawCard();
-					player1.addTableCard(tcard);
-					player2.addTableCard(tcard);
-					continueGame = processBettingRound(player2, player1, 3);
-				}
-
-				if (continueGame) {
-					// Step 4: "River"
-					tcard = deck.drawCard();
-					player1.addTableCard(tcard);
-					player2.addTableCard(tcard);
-					continueGame = processBettingRound(player2, player1, 4);
-				}
-
-				if (continueGame) {
-					// Step 5: "Showdown"
-					Hand h = Util.findWinner(player1.getHand(), player2.getHand());
-					if (h == null) {
-						processTie(players);
-					} else if (h.equals(player1.getHand())) {
-						processWinner(player1, player2);
-					} else {
-						processWinner(player2, player1);
-					}
-				}
-
-				//Check with each player if they are done or not.  This is important for humann players.
+				// Check with each player if they are done or not. This is
+				// important for humann players.
 				boolean player1Done = player1.isDonePlaying();
 				boolean player2Done = player2.isDonePlaying();
 				
 				//Decide whether to continue or not.
 				if ((numRuns > MAX_RUNS) || player1Done || player2Done) {
 					break;
-				}
-				
+				}				
 			}
 
 			logger.info("End of game results");
@@ -188,7 +146,88 @@ public class Game extends Thread {
 	}
 	
 	/**
-	 * Process a betting round. The intuitoin with this is that there are only a
+	 * Runs a new game round.  The first player in the array list is the dealer.
+	 * @param player1
+	 * @param player2
+	 * @throws ApplicationException
+	 */
+	private void runGameRound(AbstractPlayer player1, AbstractPlayer player2) throws ApplicationException {
+		deck.shuffleDeck();
+		gameState = new GameState(players);
+		
+		// Clear hands need to be called after isDonePlaying().
+		// Otherwise, the cards will not appear correctly in the webapp
+		player1.clearCards();
+		player2.clearCards();
+		
+		logger.info("Round #: " + numRuns);
+
+		logger.fine("\nStarting new game!");
+		logger.fine(player1.getName() + " has $" + player1.getBankroll());
+		logger.fine(player2.getName() + " has $" + player2.getBankroll());
+		
+		//Need a boolean to decide to continue game.  This is set to false whenever somebody folds.
+		boolean continueGame = true;
+
+		// Step 0: Blinds
+		processBlind(player1, BetType.SMALL_BLIND);
+		processBlind(player2, BetType.BIG_BLIND);
+		
+		// Step 1: "Pre-flop"
+		player1.addPlayerCard(deck.drawCard());
+		player1.addPlayerCard(deck.drawCard());
+		player2.addPlayerCard(deck.drawCard());
+		player2.addPlayerCard(deck.drawCard());
+		continueGame = processBettingRound(player1, player2, 1);
+
+		
+		
+		if (continueGame) {
+			// Step 2: "Flop"
+			Card tcard1 = deck.drawCard();
+			Card tcard2 = deck.drawCard();
+			Card tcard3 = deck.drawCard();
+			player1.addTableCard(tcard1);
+			player1.addTableCard(tcard2);
+			player1.addTableCard(tcard3);
+			player2.addTableCard(tcard1);
+			player2.addTableCard(tcard2);
+			player2.addTableCard(tcard3);
+			continueGame = processBettingRound(player1, player2, 2);
+		}
+
+		Card tcard;
+		if (continueGame) {
+			// Step 3: "Turn"
+			tcard = deck.drawCard();
+			player1.addTableCard(tcard);
+			player2.addTableCard(tcard);
+			continueGame = processBettingRound(player1, player2, 3);
+		}
+
+		if (continueGame) {
+			// Step 4: "River"
+			tcard = deck.drawCard();
+			player1.addTableCard(tcard);
+			player2.addTableCard(tcard);
+			continueGame = processBettingRound(player1, player2, 4);
+		}
+
+		if (continueGame) {
+			// Step 5: "Showdown"
+			Hand h = Util.findWinner(player1.getHand(), player2.getHand());
+			if (h == null) {
+				processTie(players);
+			} else if (h.equals(player1.getHand())) {
+				processWinner(player1, player2);
+			} else {
+				processWinner(player2, player1);
+			}
+		}		
+	}
+	
+	/**
+	 * Process a betting round. The intuition with this is that there are only a
 	 * few possible state transition diagrams:
 	 * <ul>
 	 * <li>P1 Checks -> P2 Checks -> End</li>
@@ -216,7 +255,7 @@ public class Game extends Thread {
 	 */
 	private boolean processBettingRound(AbstractPlayer player1, AbstractPlayer player2, int phase) throws ApplicationException {
 		printTableState(player1, player2);
-		Boolean b = processBet(player1, player2, phase);
+		Boolean b = processAction(player1, player2, phase);
 		
 		//If player1 folds right away, then the betting round ends.  
 		//if((b != null) && (b != true)) {
@@ -227,12 +266,12 @@ public class Game extends Thread {
 		int turnCount = 0;
 		while (true) {
 			if (turnCount % 2 == 0) {
-				Boolean continueGame = processBet(player2, player1, phase);
+				Boolean continueGame = processAction(player2, player1, phase);
 				if(continueGame != null) {
 					return continueGame;
 				}
 			} else {
-				Boolean continueGame = processBet(player1, player2, phase);
+				Boolean continueGame = processAction(player1, player2, phase);
 				if(continueGame != null) {
 					return continueGame;
 				}
@@ -261,10 +300,10 @@ public class Game extends Thread {
 	 * 
 	 * @throws ApplicationException
 	 */
-	private Boolean processBet(AbstractPlayer player1, AbstractPlayer player2, int phase) throws ApplicationException {
+	private Boolean processAction(AbstractPlayer player1, AbstractPlayer player2, int phase) throws ApplicationException {
 		PlayerAction action1 = player1.getAction(gameState);
 		if (action1.getActionType() == ActionType.FOLD) {
-			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action1));
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(player1, numRuns, phase, action1));
 			processWinner(player2, player1);
 			return Boolean.FALSE;
 		}
@@ -272,94 +311,68 @@ public class Game extends Thread {
 			if(player1.getPot() < player2.getPot()) {
 				int match = player2.getPot() - player1.getPot();
 				action1.overrideBet(match);
-				player1.addPotByCalling(match);
+				player1.addPot(match);
 			}
-			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action1));
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(player1, numRuns, phase, action1));
 			return Boolean.TRUE;
 		}
 		if (action1.getActionType() == ActionType.BET_OR_RAISE) {
+			boolean isRaise = false;  //determines if this is a bet or raise
 			if(player1.getPot() < player2.getPot()) {
 				int match = player2.getPot() - player1.getPot();
-				player1.addPotByCalling(match);
+				player1.addPot(match);
 				PlayerAction action = new PlayerAction(ActionType.CHECK_OR_CALL, match);
-				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
+				gameState.addPlayerActivityRecord(new PlayerActivityRecord(player1, numRuns, phase, action));
+				isRaise = true;
 			}
-			player1.addPotByBetting(action1.getBet());
-			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action1));
+			
+			if(isRaise) {
+				action1.setBetType(BetType.RAISE);
+			} else {
+				action1.setBetType(BetType.BET);
+			}		
+			
+			player1.addPot(action1.getBet());
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(player1, numRuns, phase, action1));
 			return null;
 		}
-		throw new RuntimeException("FATAL EXCEPTION: Player action was invalid");
+		throw new IllegalArgumentException("FATAL EXCEPTION: Player action was invalid");
 	}
 	
 	/**
-	 * Processes a betting around
-	 * @param player1
-	 * @param player2
-	 * @param state
-	 * @param isLastPerson indicates if this is the last person in the betting round, if they choose to check or call
-	 * @return Indicates if the game should continue.  True if yes, false if no (i.e. somebody folded).
-	 * @throws ApplicationException
-	 * @deprecated This was a weird/hard to debug recursive function.
+	 * Processes a blind for a player.  This can handle the big blind and the small blind.
+	 * @param player
+	 * @param betType
 	 */
-	/*
-	private boolean processBettingRound(AbstractPlayer player1, AbstractPlayer player2, int phase, boolean isLastPerson) throws ApplicationException {
-		if(!isLastPerson) {
-			printTableState(player1, player2);
-		}
-		
-		PlayerAction action = player1.getAction(gameState);
-		
-		if(action.getActionType() == ActionType.FOLD) {
-			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
-			processWinner(player2, player1);
-			return false;
-		}		
-
-		if(action.getActionType() == ActionType.CHECK_OR_CALL){
-			//If there is a difference between the player pots, then this is a call.  Otherwise, it is a check.
-			if(player1.getPot() < player2.getPot()) {
-				int bet = player2.getPot() - player1.getPot();
-				action.overrideBet(bet);	
-				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
-				player1.addPotByCalling(bet);
-			} else {
-				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
-			}
+	private void processBlind(AbstractPlayer player, BetType betType) {
+		if(betType.equals(BetType.SMALL_BLIND)) {
+			player.addPot(BLIND_AMOUNT);
 			
-			if(!isLastPerson) {
-				return processBettingRound(player2, player1, phase, true);
-			} else {				
-				return true;
-			}
-		} 
-		
-		if(action.getActionType() == ActionType.BET_OR_RAISE) {
-			//If there is a different between the player pots, then they must call first.  Then they can raise.
-			if(player1.getPot() < player2.getPot()) {
-				int bet = player2.getPot() - player1.getPot();
-				PlayerAction call = new PlayerAction(ActionType.CHECK_OR_CALL, bet);
-				gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, call));
-				player1.addPotByCalling(bet);
-			} 
+			PlayerAction action = new PlayerAction(ActionType.BET_OR_RAISE, BLIND_AMOUNT);
+			action.setBetType(betType);			
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(player, numRuns, 0, action));
 			
-			gameState.addPlayerActivityRecord(new PlayerActvityRecord(player1.getId(), player1.getName(), numRuns, phase, action));
-			player1.addPotByBetting(action.getBet());
-			return processBettingRound(player2, player1, phase, true);
+		} else if(betType.equals(BetType.BIG_BLIND)){
+			player.addPot(BLIND_AMOUNT * 2);
+			
+			PlayerAction action = new PlayerAction(ActionType.BET_OR_RAISE, BLIND_AMOUNT * 2);
+			action.setBetType(betType);
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(player, numRuns, 0, action));
+		} else {
+			throw new IllegalArgumentException("Invalid blind type");
 		}
-		
-		throw new RuntimeException("PLAYER ENTERED BETTING ROUND WITHOUT AN ACTION");
 	}
-	*/
-	
 	
 	/**
-	 * Process the winner
+	 * Process the winner. This adjusts the bankroll for the winner and loser,
+	 * and creates a record.
+	 * 
 	 * @param winner
 	 * @param loser
 	 */
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
-		gameState.addPlayerActivityRecord(new PlayerActvityRecord(winner.getId(), winner.getName(), numRuns, 5, ResultState.WIN));
-		gameState.addPlayerActivityRecord(new PlayerActvityRecord(loser.getId(), loser.getName(), numRuns, 5, ResultState.LOSE));
+		gameState.addPlayerActivityRecord(new PlayerActivityRecord(winner, numRuns, 5, ResultState.WIN));
+		gameState.addPlayerActivityRecord(new PlayerActivityRecord(loser, numRuns, 5, ResultState.LOSE));
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
 		winner.processEndOfGame(ResultState.WIN);
@@ -373,7 +386,7 @@ public class Game extends Thread {
 	private void processTie(List<AbstractPlayer> players) {
 		for(AbstractPlayer p : players) {
 			p.processEndOfGame(ResultState.TIE);
-			gameState.addPlayerActivityRecord(new PlayerActvityRecord(p.getId(), p.getName(), numRuns, 5, ResultState.TIE));
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(p, numRuns, 5, ResultState.TIE));
 		}		
 	}
 
@@ -430,9 +443,8 @@ public class Game extends Thread {
 		ObjectInput input = null;
 		try {
 	      InputStream file = new FileInputStream(name);
-	      InputStream buffer = new BufferedInputStream( file );
+	      InputStream buffer = new BufferedInputStream(file);
 	      input = new ObjectInputStream ( buffer );
-	      //deserialize the List
 	      ReinforcementLearningPlayer player = (ReinforcementLearningPlayer) input.readObject();
 	      return player;
 		} catch(IOException e) {

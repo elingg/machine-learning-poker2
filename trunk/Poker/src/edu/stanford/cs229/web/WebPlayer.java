@@ -1,6 +1,7 @@
 package edu.stanford.cs229.web;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import edu.stanford.cs229.AbstractPlayer;
 import edu.stanford.cs229.ApplicationException;
@@ -15,6 +16,8 @@ import edu.stanford.cs229.PlayerAction;
  * 
  */
 public class WebPlayer extends AbstractPlayer implements Serializable {
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.WebPlayer");
+	
 	int SLEEP_DELAY = 500; //in ms
 	int MAX_ATTEMPTS = 1000;
 	
@@ -34,6 +37,10 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 		super(name);
 	}
 	
+	public WebPlayer(String name, String id) {
+		super(name, id);		
+	}
+	
 	/**
 	 * PubSub model
 	 */
@@ -51,8 +58,9 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
-		
-		PlayerAction action = new PlayerAction(currentAction.getActionType(), currentAction.getBet()); 
+
+		//TODO: Use a more elegant way to copy an object
+		PlayerAction action = new PlayerAction(currentAction.getActionType(), currentAction.getBet(), currentAction.getResponseTime()); 
 		this.currentAction = null;
 		this.isTurnSignal = false;
 		return action;

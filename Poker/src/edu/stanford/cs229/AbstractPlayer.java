@@ -27,13 +27,15 @@ public abstract class AbstractPlayer implements Serializable {
 	public static Logger logger = Logger
 			.getLogger("edu.stanford.cs229.AbstractPlayer");
 
+	private static int DEFAULT_BANKROLL = 1000; // initially, everyone is given $1000
+	
 	private final String id;
 	
 	private final String name;
 
 	protected Hand hand;
 
-	private int bankroll = 10000; // initially, everyone is given $10000
+	private int bankroll = DEFAULT_BANKROLL; 
 
 	private int pot = 0; //how much the player has put into the current round
 
@@ -100,6 +102,14 @@ public abstract class AbstractPlayer implements Serializable {
 	 */
 	public int getBankroll() {
 		return bankroll - pot;
+	}
+	
+	/**
+	 * Resets the bankroll.
+	 * 
+	 */
+	void resetBankroll() {
+		this.bankroll = DEFAULT_BANKROLL;
 	}
 
 	/**

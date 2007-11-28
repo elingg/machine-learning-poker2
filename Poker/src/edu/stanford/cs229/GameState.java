@@ -15,7 +15,6 @@ public class GameState {
 	private final List<AbstractPlayer> players;
 	private final List<PlayerActivityRecord> playerActivityRecords;
 	
-	
 	/**
 	 * Constructor
 	 *
@@ -39,21 +38,6 @@ public class GameState {
 		logger.finest("Pot: " + totalPot);
 		return totalPot;
 	}
-	
-	/**
-	 * Gets the opponent in a web application
-	 * @return
-	 */
-	/*
-	public AbstractPlayer getOpponent() {
-		for(AbstractPlayer player : players) {
-			if(player.getName().equals(Constants.WEBAPP_OPPONENT_NAME)) {
-				return player;
-			}
-		}
-		throw new IllegalArgumentException("List of players is malformed");
-	}
-	*/
 	
 	/**
 	 * Returns the opponent. From this, you can rerieve information about your
@@ -101,5 +85,15 @@ public class GameState {
 				return true;
 		}
 		return false;
+	}
+	
+	public int getMinimumRaiseAmount() {
+		int minimumRaiseAmount = 0;
+		for(PlayerActivityRecord r : playerActivityRecords) {
+			if(r.getPlayerAction().getActionType() == ActionType.BET_OR_RAISE) {
+				minimumRaiseAmount = r.getPlayerAction().getBet();
+			}
+		}
+		return minimumRaiseAmount;
 	}
 }

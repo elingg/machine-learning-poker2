@@ -18,6 +18,7 @@ public class PlayerAction {
 	private int bet;
 	private BetType betType;
 	private long responseTime;
+	private String message;
 	
 	public PlayerAction(int actionType, int bet) {
 		this.actionType = actionType;
@@ -72,5 +73,21 @@ public class PlayerAction {
 	 */
 	public long getResponseTime() {
 		return responseTime;
+	}
+
+	/**
+	 * Gets a message that can be displayed to a human player.
+	 * @return
+	 */
+	public String getMessage() {
+		return message;
+	}
+
+	/**
+	 * Sets a message that can be displayed to a human player.
+	 * @param message
+	 */
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }

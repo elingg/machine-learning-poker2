@@ -152,13 +152,17 @@ public class Game extends Thread {
 	 * @throws ApplicationException
 	 */
 	private void runGameRound(AbstractPlayer player1, AbstractPlayer player2) throws ApplicationException {
-		deck.shuffleDeck();
-		gameState = new GameState(players);
+		resetPlayerBankrollIfNecessary(players);
 		
-		// Clear hands need to be called after isDonePlaying().
-		// Otherwise, the cards will not appear correctly in the webapp
+		// Clear hands before each game round. The hands cannot be cleared too
+		// soon after a game round ends, or the web application will not be able
+		// to reveal the cards after a showdown
 		player1.clearCards();
 		player2.clearCards();
+		
+		deck.shuffleDeck();
+		
+		gameState = new GameState(players);
 		
 		logger.info("Round #: " + numRuns);
 
@@ -179,8 +183,6 @@ public class Game extends Thread {
 		player2.addPlayerCard(deck.drawCard());
 		player2.addPlayerCard(deck.drawCard());
 		continueGame = processBettingRound(player1, player2, 1);
-
-		
 		
 		if (continueGame) {
 			// Step 2: "Flop"
@@ -193,7 +195,7 @@ public class Game extends Thread {
 			player2.addTableCard(tcard1);
 			player2.addTableCard(tcard2);
 			player2.addTableCard(tcard3);
-			continueGame = processBettingRound(player1, player2, 2);
+			continueGame = processBettingRound(player2, player1, 2);
 		}
 
 		Card tcard;
@@ -202,7 +204,7 @@ public class Game extends Thread {
 			tcard = deck.drawCard();
 			player1.addTableCard(tcard);
 			player2.addTableCard(tcard);
-			continueGame = processBettingRound(player1, player2, 3);
+			continueGame = processBettingRound(player2, player1, 3);
 		}
 
 		if (continueGame) {
@@ -210,7 +212,7 @@ public class Game extends Thread {
 			tcard = deck.drawCard();
 			player1.addTableCard(tcard);
 			player2.addTableCard(tcard);
-			continueGame = processBettingRound(player1, player2, 4);
+			continueGame = processBettingRound(player2, player1, 4);
 		}
 
 		if (continueGame) {
@@ -454,7 +456,22 @@ public class Game extends Thread {
 		}		
 	}
 
+	/**
+	 * Returns game state
+	 * @return
+	 */
 	public GameState getGameState() {
 		return gameState;
+	}
+	
+	private void resetPlayerBankrollIfNecessary(List<AbstractPlayer> players) {
+		for(AbstractPlayer p : players) {
+			if(p.getBankroll() <= 0) {
+				for(AbstractPlayer q : players) {
+					q.resetBankroll();
+				}
+				return;
+			}
+		}
 	}
 }

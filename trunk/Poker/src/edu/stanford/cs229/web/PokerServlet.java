@@ -142,8 +142,8 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 
-		//RandomPlayer player1 = new RandomPlayer(Constants.WEBAPP_OPPONENT_NAME);
-		AbstractPlayer player1 = getComputerPlayer();
+		RandomPlayer player1 = new RandomPlayer(Constants.WEBAPP_OPPONENT_NAME);
+		//AbstractPlayer player1 = getComputerPlayer();
 		
 		WebPlayer player2 = new WebPlayer(name, id);
 		players.add(player1);
@@ -209,8 +209,8 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	        // Create an appending file handler
 			try {
 				boolean append = true;
-				//FileHandler fileHandler = new FileHandler("c:/PlayerActivityRecord.log", append);
-				FileHandler fileHandler = new FileHandler("/tmp/poker/PlayerActivityRecord.log", append);
+				FileHandler fileHandler = new FileHandler("c:/PlayerActivityRecord.log", append);
+				//FileHandler fileHandler = new FileHandler("/tmp/poker/PlayerActivityRecord.log", append);
 				fileHandler.setFormatter(new LogFormatter());
 				fileHandler.setLevel(Level.FINEST);
 				//Add to the desired logger

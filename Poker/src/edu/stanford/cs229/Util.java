@@ -124,25 +124,25 @@ public class Util {
 					return hand2;
 				return null; // two three of a kinds cannot be equal
 			} else if (hand1val == 200) {
-				if (Hand1.get(1).getValue() > Hand2.get(1).getValue()) //top-pair
+				if (Hand1.get(1).getValue() > Hand2.get(1).getValue())
 					return hand1;
 				else if (Hand1.get(1).getValue() < Hand2.get(1).getValue())
 					return hand2;
-				else if (Hand1.get(0).getValue() > Hand2.get(0).getValue()) //mid-pair
+				else if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				else if (Hand1.get(2).getValue() > Hand2.get(2).getValue()) //down to the kicker now.
+				else if (Hand1.get(2).getValue() > Hand2.get(2).getValue())
 					return hand1;
 				else if (Hand1.get(2).getValue() < Hand2.get(2).getValue())
 					return hand2;
 				return null;
-			} else if (hand1val == 100) {	// only pair
+			} else if (hand1val == 100) {
 				if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				for (int i = 3; i <= 0; i--) { // down to kickers
+				for (int i = 3; i <= 0; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
 						return hand1;
 					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())
@@ -150,7 +150,7 @@ public class Util {
 				}
 				return null;
 			} else {
-				for (int i = 4; i>= 0; i--) { //only kickers
+				for (int i = 4; i>= 0; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
 						return hand1;
 					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())
@@ -165,7 +165,7 @@ public class Util {
 	public static int computeValue(Hand hand)
 	{
 		List<Card> bestHand = findBestCards(hand);
-		int = hand.getValue();
+		int handval = hand.getValue();
 		return handval;
 	}
 }

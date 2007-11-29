@@ -27,7 +27,7 @@ public class Game extends Thread {
 	/* START OF CONFIGURATION SETTINGS */
 	
 	//Interactive mode
-	private final static boolean INTERACTIVE_MODE = false;
+	private final static boolean INTERACTIVE_MODE = true;
 
 	//Load the player from disk?
 	private final static boolean RESTORE_PLAYERS = false;  
@@ -178,10 +178,12 @@ public class Game extends Thread {
 		processBlind(player2, BetType.BIG_BLIND);
 		
 		// Step 1: "Pre-flop"
-		player1.addPlayerCard(deck.drawCard());
+		// Changed the order in which cards are dealt. dealer = SMALL_BLIND - though this is immaterial, just to comply..
+		player2.addPlayerCard(deck.drawCard());
 		player1.addPlayerCard(deck.drawCard());
 		player2.addPlayerCard(deck.drawCard());
-		player2.addPlayerCard(deck.drawCard());
+		player1.addPlayerCard(deck.drawCard());
+		
 		continueGame = processBettingRound(player1, player2, 1);
 		
 		if (continueGame) {

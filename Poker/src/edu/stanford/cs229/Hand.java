@@ -136,166 +136,224 @@ public class Hand implements Serializable {
 
 	public List<Card> isStraightFlush() {
 		// sort all cards
-		List<Card> tempList = this.isStraight();
-		List<Card> tempList1 = this.isFlush();
-		if (tempList != null && tempList1 != null && tempList.equals(tempList1)) {
-			return tempList;
+		List<Card> suitList= new ArrayList<Card>();
+		List<Card> tempList= new ArrayList<Card>();
+		for(int n=1; n<=4; n++)
+		{			
+			suitList = getSuit(n);
+			if(suitList.size()>=5)
+			{
+				// there is a flush - there can only be one flush
+				// to see if there is a straight here, there cannot be duplicates
+				for(int i=suitList.size()-1; i>=4; i--)
+				{
+					if(((suitList.get(i)).getValue() - 1 == (suitList.get(i-1)).getValue()) && ((suitList.get(i-1)).getValue() - 1 == (suitList.get(i-2)).getValue()) && ((suitList.get(i-2)).getValue() - 1 == (suitList.get(i-3)).getValue()) && ((suitList.get(i-3)).getValue() - 1 == (suitList.get(i-4)).getValue()))
+					{
+						tempList.add(suitList.get(i-4));
+						tempList.add(suitList.get(i-3));
+						tempList.add(suitList.get(i-2));
+						tempList.add(suitList.get(i-1));
+						tempList.add(suitList.get(i));
+						//returns the top straight flush
+						return tempList;
+					}
+				}
+				return null;
+			}
 		}
 		return null;
 	}
 	
 	
 	public List<Card> isFlush(){
-		
-		List<Card> tempList=null;
-		
 		this.getSorted();
+		List<Card> tempList= new ArrayList<Card>();
+		List<Card> suitList= new ArrayList<Card>();
 		for(int i=1; i<=4; i++)
 		{
-			List<Card> suitList= getSuit(i);
+			// There can be only one flush
+			suitList= getSuit(i);
 			if(suitList.size()>=5)
 			{
 				suitList= suitList.subList(suitList.size()-5, suitList.size());
-				
-				if(tempList==null)
-				{
-					tempList=suitList;
-				}
-				else if(suitList.get(4).getValue() > tempList.get(4).getValue())
-				{
-					tempList=suitList;
-				}
+				// returns the top flush
+				return suitList;
 			}
-			
 		}
-		return tempList;
+		return null;
 	}
-	
 	
 	public List<Card> isStraight(){
 		
 		this.getSorted();
 		List<Card> tempList= new ArrayList<Card>();
+		List<Card> tempCards= new ArrayList<Card>();
+		for(int i=0; i<allCards.size(); i++)	// do a deep copy to clone allCards.		
+			tempCards.add(allCards.get(i));
+		// Removed duplicates in the list before checking for a straight
+		for(int i=0; i<tempCards.size()-1; i++){
+			if(tempCards.get(i).getValue() == tempCards.get(i+1).getValue())
+				tempCards.remove(i);
+		}
 		
-		for(int i=allCards.size()-1; i>=4; i--)
+		for(int i=tempCards.size()-1; i>=4; i--)
 		{
-			
-			if(((allCards.get(i)).getValue() - 1 == (allCards.get(i-1)).getValue()) && ((allCards.get(i-1)).getValue() - 1 == (allCards.get(i-2)).getValue()) && ((allCards.get(i-2)).getValue() - 1 == (allCards.get(i-3)).getValue()) && ((allCards.get(i-3)).getValue() - 1 == (allCards.get(i-4)).getValue()))
+			if(((tempCards.get(i)).getValue() - 1 == (tempCards.get(i-1)).getValue()) && ((tempCards.get(i-1)).getValue() - 1 == (tempCards.get(i-2)).getValue()) && ((tempCards.get(i-2)).getValue() - 1 == (tempCards.get(i-3)).getValue()) && ((tempCards.get(i-3)).getValue() - 1 == (tempCards.get(i-4)).getValue()))
 			{
-				tempList.add(allCards.get(i-4));
-				tempList.add(allCards.get(i-3));
-				tempList.add(allCards.get(i-2));
-				tempList.add(allCards.get(i-1));
-				tempList.add(allCards.get(i));
-				
+				tempList.add(tempCards.get(i-4));
+				tempList.add(tempCards.get(i-3));
+				tempList.add(tempCards.get(i-2));
+				tempList.add(tempCards.get(i-1));
+				tempList.add(tempCards.get(i));
+				// Eg. (4,5,6,7,8) returned
 				return tempList;
 			}
 				
 		}
 		
 		return null;
-		
 	}
 	
 	
 	public List<Card> isFullHouse(){
 		
-		//sort all cards
-		List<Card> tempList= this.isPair();
-		List<Card> tempList1 = this.isThreeKind();
+		List<Card> tempList= new ArrayList<Card>();
+		List<Card> tempList1= new ArrayList<Card>();
+		List<Card> tempList2= new ArrayList<Card>();
+		tempList1 = this.isThreeKind();
+		if (tempList1 == null)
+			return null;
+		tempList2= this.isPair();
 		
-		if(tempList != null && tempList1 !=null && !tempList.get(tempList.size()-1).equals(tempList1.get(tempList1.size()-1)))
+		if(tempList1 != null && tempList2 !=null && tempList2.get(0)!=tempList1.get(0))
 		{
-			tempList.addAll(tempList1);
-			Collections.sort(tempList);
-			return tempList;
+			tempList1.remove(1);
+			tempList1.remove(2);
+			tempList1.add(tempList2.get(0));
+			// returns the trip card followed by the pair card. Eg. (3,4,4,4,7,K,K) -> [4,K]
+			return tempList1;
 		}
-	
 		return null;
-		
 	}
 	
 	public List<Card> isFourKind(){
 	
 		this.getSorted();
 		List<Card> tempList= new ArrayList<Card>();
-	
 		for(int i=allCards.size()-1; i>=3; i--)
 		{
 			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue() && allCards.get(i-1).getValue() ==allCards.get(i-2).getValue()  && allCards.get(i-2).getValue() ==allCards.get(i-3).getValue() )
-				{
-				tempList.add(allCards.get(i-3));
-				tempList.add(allCards.get(i-2));
-				tempList.add(allCards.get(i-1));
-				tempList.add(allCards.get(i));
+			{	
+				tempList.add(allCards.get(i-3));	
+				if(i==allCards.size()-1) // if the top card is the quad card
+					tempList.add(allCards.get(i-4));	// Kicker card
+				else tempList.add(allCards.get(allCards.size()-1));
+				// 2 cards are returned, 1st is quad card, 2nd is the kicker (kicker doesn't really matter here)
 				return tempList;
 			}
 				
 		}
 		
 		return null;
-		
 	}
 	
 	public List<Card> isThreeKind(){
 		
 		this.getSorted();
 		List<Card> tempList= new ArrayList<Card>();
-		
-		for(int i=allCards.size()-1; i>=2; i--)
+		List<Card> tempCards= new ArrayList<Card>();
+		for(int i=0; i<allCards.size(); i++)	// do a deep copy to clone allCards.		
+			tempCards.add(allCards.get(i));
+		for(int i=tempCards.size()-1; i>=2; i--)
 		{
-			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue() && allCards.get(i-1).getValue() ==allCards.get(i-2).getValue() )
+			if(tempCards.get(i).getValue() ==tempCards.get(i-1).getValue() && tempCards.get(i-1).getValue() ==tempCards.get(i-2).getValue() )
 			{
-				tempList.add(allCards.get(i-2));
-				tempList.add(allCards.get(i-1));
-				tempList.add(allCards.get(i));
+				tempList.add(tempCards.get(i-2));
+				tempCards.remove(i);
+				tempCards.remove(i-1);
+				tempCards.remove(i-2);
+				tempList.add(tempCards.get(tempCards.size()-2));
+				tempList.add(tempCards.get(tempCards.size()-1));
+				// returns 3 cards - 1st the trip card and then the top two kickers (kickers don't really matter here). Eg. if the hand is (4,6,6,6,J,K,A), [6,K,A] is returned
 				return tempList;
 			}
 		}
-		
 		return null;
 	}
 	
 	public List<Card> isTwoPair()
 	{
-		int numPairs=0;
-		
 		this.getSorted();
+		int numPairs=0;
 		List<Card> tempList= new ArrayList<Card>();
-		
-		for(int i=allCards.size()-1; i>=1; i--)
+		List<Card> tempCards= new ArrayList<Card>();
+		List<Card> tripCards= new ArrayList<Card>(); // if it comes to check for two-pair, then it cannot have three-of-a-kind, but anyways no harm in checking.
+		for(int i=0; i<allCards.size(); i++)	// do a deep copy to clone allCards.		
+			tempCards.add(allCards.get(i));
+		tripCards = isThreeKind();
+		if(tripCards!=null)	// if there is a three of a kind, two pair doesnt count any more.
+				return null;
+		for(int i=0; i<tempCards.size()-1; i++)
 		{
-			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue())
+			if(tempCards.get(i).getValue() ==tempCards.get(i+1).getValue())
 			{
-				tempList.add(allCards.get(i-1));
-				tempList.add(allCards.get(i));
-				
+				tempList.add(tempCards.get(i));
+				tempCards.remove(i+1);
+				tempCards.remove(i);
+								
 				numPairs++;
 				if(numPairs==2)
 				{
-					Collections.sort(tempList);
+					tempList.add(tempCards.get(tempCards.size()-1));
+					// 3 cards are returned. 1st two are sorted pair cards and third is kicker. Eg. if hand is (4,4,6,6,J,K,A), then [4,6,A] is returned
 					return tempList;
 				}
 			}
 		}
 		
 		return null;
-		
 	}
 
 	public List<Card> isPair() {
-		//sort all cards
+		
 		this.getSorted();
+		System.out.println("Size:"+allCards.size());
 		List<Card> tempList = new ArrayList<Card>();
-
-		for (int i = allCards.size() - 1; i >= 1; i--) {
-			if (allCards.get(i).getValue() == allCards.get(i - 1).getValue()) {
-				tempList.add(allCards.get(i - 1));
-				tempList.add(allCards.get(i));
-				return tempList;
+		List<Card> tempCards= new ArrayList<Card>();
+		List<Card> tripCards= new ArrayList<Card>();
+		for(int i=0; i<allCards.size(); i++)	// do a deep copy to clone allCards.		
+			tempCards.add(allCards.get(i));
+		tripCards = isThreeKind();	// to check for a trip in case this method is being called from isFullHouse
+		
+		for (int i = tempCards.size() - 1; i >= 1; i--) {
+			if(tripCards!=null){
+				if(tempCards.get(i).getValue() == tripCards.get(0).getValue()){
+					tempCards.remove(i);
+					tempCards.remove(i-1);
+					tempCards.remove(i-2);
+					i = i-3;
+				}
+			}
+			if (tempCards.get(i).getValue() == tempCards.get(i - 1).getValue()) {
+				
+				tempList.add(tempCards.get(i - 1));
+				tempCards.remove(i);
+				tempCards.remove(i-1);
+				if(tripCards!=null){
+					tempList.add(tempCards.get(tempCards.size()-3));
+					tempList.add(tempCards.get(tempCards.size()-2));
+					tempList.add(tempCards.get(tempCards.size()-1));
+				}
+				// 4 cards are returned, 1st is the pair card, last 3 are the kickers
+				return tempList; // for a full-house, only the pair card is returned
 			}
 		}
 
 		return null;
+	}
+	
+	public List<Card> highCard() {
+		// return best 5 cards. Eg (5,7,9,K,A)
+		return allCards.subList(Math.max(allCards.size()-5,0), allCards.size());
 	}
 }

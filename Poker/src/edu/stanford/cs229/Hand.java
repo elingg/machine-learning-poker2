@@ -300,7 +300,7 @@ public class Hand implements Serializable {
 				tempList.add(tempCards.get(i));
 				tempCards.remove(i+1);
 				tempCards.remove(i);
-								
+				i--;				
 				numPairs++;
 				if(numPairs==2)
 				{

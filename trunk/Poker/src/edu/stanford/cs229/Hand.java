@@ -246,7 +246,8 @@ public class Hand implements Serializable {
 			{	
 				tempList.add(allCards.get(i-3));	
 				if(i==allCards.size()-1) // if the top card is the quad card
-					tempList.add(allCards.get(i-4));	// Kicker card
+					if(i>=4)
+						tempList.add(allCards.get(i-4));	// Kicker card
 				else tempList.add(allCards.get(allCards.size()-1));
 				// 2 cards are returned, 1st is quad card, 2nd is the kicker (kicker doesn't really matter here)
 				return tempList;
@@ -272,8 +273,10 @@ public class Hand implements Serializable {
 				tempCards.remove(i);
 				tempCards.remove(i-1);
 				tempCards.remove(i-2);
-				tempList.add(tempCards.get(tempCards.size()-2));
-				tempList.add(tempCards.get(tempCards.size()-1));
+				if(tempCards.size()>=2){
+					tempList.add(tempCards.get(tempCards.size()-2));
+					tempList.add(tempCards.get(tempCards.size()-1));
+				}
 				// returns 3 cards - 1st the trip card and then the top two kickers (kickers don't really matter here). Eg. if the hand is (4,6,6,6,J,K,A), [6,K,A] is returned
 				return tempList;
 			}
@@ -304,7 +307,8 @@ public class Hand implements Serializable {
 				numPairs++;
 				if(numPairs==2)
 				{
-					tempList.add(tempCards.get(tempCards.size()-1));
+					if(tempCards.size()>=1)
+						tempList.add(tempCards.get(tempCards.size()-1));
 					// 3 cards are returned. 1st two are sorted pair cards and third is kicker. Eg. if hand is (4,4,6,6,J,K,A), then [4,6,A] is returned
 					return tempList;
 				}
@@ -317,7 +321,6 @@ public class Hand implements Serializable {
 	public List<Card> isPair() {
 		
 		this.getSorted();
-		System.out.println("Size:"+allCards.size());
 		List<Card> tempList = new ArrayList<Card>();
 		List<Card> tempCards= new ArrayList<Card>();
 		List<Card> tripCards= new ArrayList<Card>();
@@ -339,7 +342,7 @@ public class Hand implements Serializable {
 				tempList.add(tempCards.get(i - 1));
 				tempCards.remove(i);
 				tempCards.remove(i-1);
-				if(tripCards!=null){
+				if(tripCards==null && tempCards.size()>=3){
 					tempList.add(tempCards.get(tempCards.size()-3));
 					tempList.add(tempCards.get(tempCards.size()-2));
 					tempList.add(tempCards.get(tempCards.size()-1));

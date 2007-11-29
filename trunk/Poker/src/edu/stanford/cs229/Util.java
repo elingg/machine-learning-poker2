@@ -36,7 +36,6 @@ public class Util {
 	 * @return
 	 */
 	public static List<Card> findBestCards(Hand hand) {
-	//	System.out.println(hand+" ");
 		if (hand.isStraightFlush() != null) {
 			hand.setValue(straightflush);
 			return hand.isStraightFlush();
@@ -72,7 +71,7 @@ public class Util {
 	{	
 		List<Card> Hand1 = findBestCards(hand1);
 		List<Card> Hand2 = findBestCards(hand2);
-
+		System.out.println("Best Hand 1:"+Hand1+" Best Hand 2:"+Hand2);
 		int hand1val = hand1.getValue();
 		int hand2val = hand2.getValue();
 		System.out.println(hand1val + "  " + hand2val);
@@ -142,7 +141,7 @@ public class Util {
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				for (int i = 3; i <= 0; i--) {
+				for (int i = 3; i >= 1; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
 						return hand1;
 					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())

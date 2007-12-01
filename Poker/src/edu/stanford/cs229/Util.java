@@ -36,6 +36,7 @@ public class Util {
 	 * @return
 	 */
 	public static List<Card> findBestCards(Hand hand) {
+		
 		if (hand.isStraightFlush() != null) {
 			hand.setValue(straightflush);
 			return hand.isStraightFlush();

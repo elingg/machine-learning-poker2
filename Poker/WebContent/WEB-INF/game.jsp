@@ -11,9 +11,8 @@
 	response.setHeader("P3P","CP='NOI DSP NID TAIo PSAa OUR IND UNI OTC TST'");
 	Game game = (Game) session.getAttribute(Constants.GAME_ATTRIBUTE);
 	WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
-	boolean isEndOfGame = game.getGameState().isEndOfGame();
+
 	AbstractPlayer opponent = (AbstractPlayer) game.getGameState().getOpponent(player);
-	
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -26,30 +25,23 @@
 <center>
 <br/>
 
-<!-- COMPUTER PLAYER -->
+<!-- COMPUTER PLAYER (NAME AND POT) -->
 <b><%=opponent.getName()%></b><br/>
 <b>Bankroll</b>: $<%=opponent.getBankroll()%> | <b>Pot</b>: <%=opponent.getPot()%><br/>
 
-
-<%
-if(!isEndOfGame) {
-%>
+<!-- COMPUTER PLAYER CARDS (EITHER HIDDEN OR SHOWN) -->
+<%if(!game.getGameState().isShowCards()) {%>
   <%=Card.getHiddenCardsAsHtml()%><br/>
-<%
-} else {
-%>
+<%} else {%>
   <%=opponent.getHand().getPlayerCardsAsHtml()%>
-<%
-}
-%>
-
+<%}%>
 
 <!-- TABLE CARDS -->
 <br/>
 <%=player.getHand().getTableCardsAsHtml()%><br/>
 <br/>
 
-<!-- HUMAN PLAYER -->
+<!-- HUMAN PLAYER (NAME AND POT) -->
 
 <%=player.getHand().getPlayerCardsAsHtml()%><br/>
 <br/>
@@ -57,27 +49,26 @@ if(!isEndOfGame) {
 <b>Bankroll</b>: $<%=player.getBankroll()%> | <b>Pot</b>: <%=player.getPot()%><br/>
 
 
-<%
-if(!isEndOfGame) {
-%>
+<!-- CHECK/BET/FOLD BUTTONS -->
+<%if(!game.getGameState().isEndOfGame()) {%>
 <form action="PokerServlet" method="get">
-	<input type="submit" name="actionType" value="<%=Constants.CHECK_CALL_LABEL %>"/>
+<%if(game.getGameState().arePotsEqual()) {%>
+	<input type="submit" name="actionType" value="<%=Constants.CHECK_LABEL %>"/>
+<% } else {%>
+	<input type="submit" name="actionType" value="<%=Constants.CALL_LABEL %>"/>
+<% } %>
 	<input type="submit" name="actionType" value="<%=Constants.BET_RAISE_LABEL %>" />
 	<input type="submit" name="actionType" value="<%=Constants.FOLD_LABEL %>" />
 	<br/>
 	Bet/Raise Amount: <input type="text" size="2" name="<%=Constants.BET_PARAMETER %>" value="10" />
 </form>
-<%
-} else {
-%>
+<%} else {%>
 <form action="PokerServlet" method="get">
 	<input type="submit" name="<%=Constants.PLAY_AGAIN_PARAMETER%>" value="Play Again" />
 </form>
-<%
-}
-%>
+<%}%>
 
-
+<!-- ACTIVITY FOR THIS GAME -->
 <%
 	for(PlayerActivityRecord r : game.getGameState().getPlayerActivityRecords()) {
 	String bgColor = "#FFCF73";
@@ -90,6 +81,7 @@ if(!isEndOfGame) {
 
 </center>
 
+<!-- GOOGLE ANALYTICS CODE -->
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 </script>
 <script type="text/javascript">

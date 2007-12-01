@@ -224,11 +224,13 @@ public class Hand implements Serializable {
 		if (tempList1 == null)
 			return null;
 		tempList2= this.isPair();
+
 		
 		if(tempList1 != null && tempList2 !=null && tempList2.get(0)!=tempList1.get(0))
 		{
-			tempList1.remove(1);
+			
 			tempList1.remove(2);
+			tempList1.remove(1);
 			tempList1.add(tempList2.get(0));
 			// returns the trip card followed by the pair card. Eg. (3,4,4,4,7,K,K) -> [4,K]
 			return tempList1;
@@ -337,7 +339,7 @@ public class Hand implements Serializable {
 					i = i-3;
 				}
 			}
-			if (tempCards.get(i).getValue() == tempCards.get(i - 1).getValue()) {
+			if (i>=1 && tempCards.get(i).getValue() == tempCards.get(i - 1).getValue()) {
 				
 				tempList.add(tempCards.get(i - 1));
 				tempCards.remove(i);

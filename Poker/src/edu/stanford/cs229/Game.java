@@ -184,7 +184,7 @@ public class Game extends Thread {
 		player2.addPlayerCard(deck.drawCard());
 		player1.addPlayerCard(deck.drawCard());
 		
-		continueGame = processBettingRound(player1, player2, 1);
+		continueGame = processBettingRound(player1, player2, BettingRound.PRE_FLOP);
 		
 		if (continueGame) {
 			// Step 2: "Flop"
@@ -197,7 +197,7 @@ public class Game extends Thread {
 			player2.addTableCard(tcard1);
 			player2.addTableCard(tcard2);
 			player2.addTableCard(tcard3);
-			continueGame = processBettingRound(player2, player1, 2);
+			continueGame = processBettingRound(player2, player1, BettingRound.FLOP);
 		}
 
 		Card tcard;
@@ -206,7 +206,7 @@ public class Game extends Thread {
 			tcard = deck.drawCard();
 			player1.addTableCard(tcard);
 			player2.addTableCard(tcard);
-			continueGame = processBettingRound(player2, player1, 3);
+			continueGame = processBettingRound(player2, player1, BettingRound.TURN);
 		}
 
 		if (continueGame) {
@@ -214,7 +214,7 @@ public class Game extends Thread {
 			tcard = deck.drawCard();
 			player1.addTableCard(tcard);
 			player2.addTableCard(tcard);
-			continueGame = processBettingRound(player2, player1, 4);
+			continueGame = processBettingRound(player2, player1, BettingRound.RIVER);
 		}
 
 		if (continueGame) {
@@ -375,8 +375,8 @@ public class Game extends Thread {
 	 * @param loser
 	 */
 	private void processWinner(AbstractPlayer winner, AbstractPlayer loser) {
-		gameState.addPlayerActivityRecord(new PlayerActivityRecord(winner, numRuns, 5, ResultState.WIN));
-		gameState.addPlayerActivityRecord(new PlayerActivityRecord(loser, numRuns, 5, ResultState.LOSE));
+		gameState.addPlayerActivityRecord(new PlayerActivityRecord(winner, numRuns, BettingRound.SHOWDOWN, ResultState.WIN));
+		gameState.addPlayerActivityRecord(new PlayerActivityRecord(loser, numRuns, BettingRound.SHOWDOWN, ResultState.LOSE));
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
 		winner.processEndOfGame(ResultState.WIN);
@@ -390,7 +390,7 @@ public class Game extends Thread {
 	private void processTie(List<AbstractPlayer> players) {
 		for(AbstractPlayer p : players) {
 			p.processEndOfGame(ResultState.TIE);
-			gameState.addPlayerActivityRecord(new PlayerActivityRecord(p, numRuns, 5, ResultState.TIE));
+			gameState.addPlayerActivityRecord(new PlayerActivityRecord(p, numRuns, BettingRound.SHOWDOWN, ResultState.TIE));
 		}		
 	}
 

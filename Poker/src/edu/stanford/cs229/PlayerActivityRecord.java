@@ -1,5 +1,6 @@
 package edu.stanford.cs229;
 
+import java.util.Calendar;
 import java.util.logging.Logger;
 
 /***
@@ -61,8 +62,15 @@ public class PlayerActivityRecord {
 		logToFile();
 	}
 	
+	/**
+	 * Logs the activity record to a file.  This is used for analysis.
+	 * @return
+	 */
 	public String logToFile() {
-		String s = playerId + "," + gameNum + "," + phaseNum + "," + hand.toString() + "," + Util.computeValue(hand);
+		Calendar c = Calendar.getInstance();
+		
+		String s = c.getTime() + "," + playerId + "," + gameNum + "," + phaseNum + ",";
+		s += hand.toString() + "," + Util.computeValue(hand) + ",";
 		if(playerAction != null) {
 			s += "," +playerAction.getActionType() + "," + playerAction.getBet() + "," + responseTime;
 		} else {

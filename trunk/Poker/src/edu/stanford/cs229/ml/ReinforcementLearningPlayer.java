@@ -57,7 +57,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	{
 		for(int i=0; i<=800; i=i+100)
 		{
-			for(int j=2; j<=14; j++)
+			for(int j=0; j<=14; j++)
 			{
 				ht.put((i+j), new Fraction(1,2));
 			}
@@ -196,7 +196,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	public void debugState(Hashtable<Integer, Fraction> ht) {
 		for(int i=0; i<=800; i=i+100)
 		{
-			for(int j=2; j<=14; j++)
+			for(int j=0; j<=14; j++)
 			{
 				System.out.println((i+j)+ " " + ht.get(i+j));
 			}

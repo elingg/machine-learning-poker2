@@ -11,7 +11,8 @@ public class Constants {
 	public static String END_OF_GAME_PARAMETER = "isEndOfGame";
 	public static String WEB_PLAYER = "webPlayer";
 	public static String TIMESTAMP = "timestamp";
-	public static String CHECK_CALL_LABEL = "Check/Call";
+	public static String CHECK_LABEL = "Check";
+	public static String CALL_LABEL = "Call";
 	public static String BET_RAISE_LABEL = "Bet/Raise";
 	public static String FOLD_LABEL = "Fold";
 	public static String IS_FACEBOOK = "isFacebook";

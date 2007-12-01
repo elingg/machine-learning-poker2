@@ -72,6 +72,21 @@ public class GameState {
 	}
 	
 	/**
+	 * Returns true if players must show cards.  This happens if nobody has folded,
+	 * and it is the end of the game.  
+	 * 
+	 * @return
+	 */
+	public boolean isShowCards() {
+		for(PlayerActivityRecord r : playerActivityRecords) {
+			//If somebody has folded, then there is no need to show cards
+			if((r.getPlayerAction() != null) && (r.getPlayerAction().getActionType() == ActionType.FOLD))
+				return false;
+		}
+		return isEndOfGame();
+	}
+	
+	/**
 	 * Convenience method. Indicates if it is the end of a game. This looks at
 	 * the playerActivityRecords and see if the last item was a resultState.
 	 * 
@@ -96,4 +111,17 @@ public class GameState {
 		}
 		return minimumRaiseAmount;
 	}
+	
+	/**
+	 * Compares the pots of Player 1 and Player 2
+	 * @return
+	 */
+	public boolean arePotsEqual() {
+		if(players.get(0).getPot() != players.get(1).getPot()) {
+			return false;
+		} else {
+			return true;
+		}		
+	}
+	
 }

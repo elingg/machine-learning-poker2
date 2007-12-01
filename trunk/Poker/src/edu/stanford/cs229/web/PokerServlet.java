@@ -164,7 +164,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	public void processPlayerAction(WebPlayer player, String actionStr, String bet, Long responseTime) {
 		if(actionStr.equals(Constants.FOLD_LABEL)) {
 			player.setCurrentAction(new PlayerAction(ActionType.FOLD, 0, responseTime));
-		} else if(actionStr.equals(Constants.CHECK_CALL_LABEL)) {
+		} else if(actionStr.equals(Constants.CHECK_LABEL) || actionStr.equals(Constants.CALL_LABEL)) {
 			player.setCurrentAction(new PlayerAction(ActionType.CHECK_OR_CALL, 0, responseTime));
 		} else if(actionStr.equals(Constants.BET_RAISE_LABEL)) {
 			player.setCurrentAction(new PlayerAction(ActionType.BET_OR_RAISE, Integer.parseInt(bet), responseTime));

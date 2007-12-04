@@ -128,14 +128,15 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	
 	@Override
 	public PlayerAction getAction(GameState state) throws ApplicationException {
+		int totalPot = state.getTotalPot();
 		if(this.hand.getAllCards().size() == 2) 
-			return getActionAfterNumCards(this.initialState);
+			return getActionAfterNumCards(this.initialState, totalPot);
 		else if (this.hand.getAllCards().size()==5)
-			return getActionAfterNumCards(this.fiveCardState);
+			return getActionAfterNumCards(this.fiveCardState, totalPot);
 		else if (this.hand.getAllCards().size()==6)
-			return getActionAfterNumCards(this.sixCardState);
+			return getActionAfterNumCards(this.sixCardState, totalPot);
 		else if (this.hand.getAllCards().size()==7)
-			return getActionAfterNumCards(this.sevenCardState);
+			return getActionAfterNumCards(this.sevenCardState, totalPot);
 
 		System.err.println(this.hand.getAllCards().size() + "is not a valid value");
 		return null;		
@@ -146,22 +147,23 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	 * @param ht
 	 * @return
 	 */
-	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht)
+	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht, int totalPot)
 	{
-		float FOLDING_THRESHOLD = -10;
-		float CHECKING_THRESHOLD = 28;
-		int NUM_GAMES_ALWAYS_CHECK = 50000;  //always check a min number of games so that our player can learn
-		//logger.fine(Integer.toString(Util.computeValue(this.hand)));
-		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), this.getPot()*2);
-		float expbet= findExpectedValue(Util.computeValue(this.hand), ht, this.getPot()+10, (this.getPot()+10)*2);
-		float ev= Math.max(exp, expbet);
-		if(ev < FOLDING_THRESHOLD && numGames>NUM_GAMES_ALWAYS_CHECK)
-			return new PlayerAction(ActionType.FOLD, 0);
-		//else if((Math.abs(ev-exp) < CHECKING_THRESHOLD) || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
-		//else if(expbet <= CHECKING_THRESHOLD || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
+		float FOLDING_THRESHOLD = (float).05;
+		if(this.hand.getAllCards().size() ==2)
+			FOLDING_THRESHOLD = (float)0;
 		
-		else if(exp<=.9 || betCountMaxForEachGame > 3 || numGames<NUM_GAMES_ALWAYS_CHECK)
+		float CHECKING_THRESHOLD = (float).9;
+		
+		
+		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), totalPot);
+	
+		if(exp < FOLDING_THRESHOLD)
+			return new PlayerAction(ActionType.FOLD, 0);
+		
+		else if(exp<=CHECKING_THRESHOLD || betCountMaxForEachGame > 3 )
 		return new PlayerAction(ActionType.CHECK_OR_CALL,0);
+		
 		else {
 			betCountMaxForEachGame++;
 			return new PlayerAction(ActionType.BET_OR_RAISE,10);

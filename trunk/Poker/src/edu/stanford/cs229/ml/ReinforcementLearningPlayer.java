@@ -168,7 +168,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		
 		float exp=findExpectedValue(handVal,ht, this.getPot(), totalPot);
 	
-		if(exp < FOLDING_THRESHOLD || (totalPot>75 && handVal <600))
+		if(exp < FOLDING_THRESHOLD || (totalPot>100 && handVal <600))
 			return new PlayerAction(ActionType.FOLD, 0);
 		
 		else if(exp<=CHECKING_THRESHOLD || betCountMaxForEachGame > 3 )

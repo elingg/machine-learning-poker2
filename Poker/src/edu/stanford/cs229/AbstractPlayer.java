@@ -29,7 +29,7 @@ public abstract class AbstractPlayer implements Serializable {
 
 	private static int DEFAULT_BANKROLL = 1000; // initially, everyone is given $1000
 	
-	private final String id;
+	private String id;
 	
 	private final String name;
 
@@ -60,6 +60,10 @@ public abstract class AbstractPlayer implements Serializable {
 	 */
 	public String getId() {
 		return id;
+	}
+	
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/**
@@ -106,9 +110,9 @@ public abstract class AbstractPlayer implements Serializable {
 	
 	/**
 	 * Resets the bankroll.
-	 * 
+	 * TODO: This should be default access, instead of public
 	 */
-	void resetBankroll() {
+	public void resetBankroll() {
 		this.bankroll = DEFAULT_BANKROLL;
 	}
 

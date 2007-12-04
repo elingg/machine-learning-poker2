@@ -18,6 +18,8 @@ public class PlayerActivityRecord {
 	
 	private final String playerId;
 	private final String name;
+	private final int pot;
+	private final int bankroll;
 	private final int gameNum;
 	private final int phaseNum;
 	private Hand hand;
@@ -36,6 +38,8 @@ public class PlayerActivityRecord {
 		this.playerId = player.getId();
 		this.name = player.getName();
 		this.hand = player.getHand();
+		this.pot = player.getPot();
+		this.bankroll = player.getBankroll();
 		this.gameNum = gameNum;
 		this.phaseNum = phaseNum;
 		this.playerAction = playerAction;
@@ -55,6 +59,8 @@ public class PlayerActivityRecord {
 		this.playerId = player.getId();
 		this.name = player.getName();
 		this.hand = player.getHand();
+		this.pot = player.getPot();
+		this.bankroll = player.getBankroll();
 		this.gameNum = gameNum;
 		this.phaseNum = phaseNum;
 		this.resultState = resultState;
@@ -69,8 +75,8 @@ public class PlayerActivityRecord {
 	public String logToFile() {
 		Calendar c = Calendar.getInstance();
 		
-		String s = c.getTime() + "," + playerId + "," + gameNum + "," + phaseNum + ",";
-		s += hand.toString() + "," + Util.computeValue(hand) + ",";
+		String s = c.getTime() + "," + playerId + "," + pot + "," + bankroll + "," + gameNum + "," + phaseNum + ",";
+		s += hand.toString() + "," + Util.computeValue(hand);
 		if(playerAction != null) {
 			s += "," +playerAction.getActionType() + "," + playerAction.getBet() + "," + responseTime;
 		} else {

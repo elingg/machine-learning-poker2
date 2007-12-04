@@ -26,7 +26,10 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	private int sevenCardKey;
 	
 	private int numGames;
+	private int numGamesWon;
 	private int betCountMaxForEachGame;
+	
+	private Fraction strengthOfOpponent;
 	
 	/*
 	public ReinforcementLearningPlayer() {
@@ -50,7 +53,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		initializeValues(sixCardState);
 		initializeValues(sevenCardState);
 		numGames=0;
-		
+		strengthOfOpponent=new Fraction(1,2);
 	}
 	
 	private void initializeValues(Hashtable<Integer,Fraction> ht)
@@ -110,11 +113,13 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 			fiveCardState.put(fiveCardKey, new Fraction(fiveCardVal.getNumerator()+1,fiveCardVal.getDenominator()+1));
 			sixCardState.put(sixCardKey, new Fraction(sixCardVal.getNumerator()+1,sixCardVal.getDenominator()+1));
 			sevenCardState.put(sevenCardKey,new Fraction(sevenCardVal.getNumerator()+1,sevenCardVal.getDenominator()+1));
+			strengthOfOpponent = new Fraction(strengthOfOpponent.getNumerator()+1, strengthOfOpponent.getDenominator()+1);
 		} else if(resultState == ResultState.LOSE) {
 			initialState.put(initialKey, new Fraction(initialVal.getNumerator(), initialVal.getDenominator()+1));
 			fiveCardState.put(fiveCardKey, new Fraction(fiveCardVal.getNumerator(),fiveCardVal.getDenominator()+1));
 			sixCardState.put(sixCardKey, new Fraction(sixCardVal.getNumerator(),sixCardVal.getDenominator()+1));
 			sevenCardState.put(sevenCardKey,new Fraction(sevenCardVal.getNumerator(),sevenCardVal.getDenominator()+1));
+			strengthOfOpponent = new Fraction(strengthOfOpponent.getNumerator(), strengthOfOpponent.getDenominator()+1);
 		}
 		numGames++;
 		betCountMaxForEachGame = 0;
@@ -153,7 +158,11 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		if(this.hand.getAllCards().size() ==2)
 			FOLDING_THRESHOLD = (float)0;
 		
-		float CHECKING_THRESHOLD = (float).9;
+		
+		float CHECKING_THRESHOLD = (float).75;
+		
+		if(((float)(strengthOfOpponent.getNumerator()/ strengthOfOpponent.getDenominator()) >.6) || this.getBankroll() <=850)
+			CHECKING_THRESHOLD = (float).9;
 		
 		
 		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), totalPot);
@@ -166,7 +175,10 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		
 		else {
 			betCountMaxForEachGame++;
-			return new PlayerAction(ActionType.BET_OR_RAISE,10);
+			if(Util.computeValue(this.hand)>=600)
+				return new PlayerAction(ActionType.BET_OR_RAISE,20);
+			else
+				return new PlayerAction(ActionType.BET_OR_RAISE,10);
 		}
 	}
 	

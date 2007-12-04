@@ -154,6 +154,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	 */
 	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht, int totalPot)
 	{
+		int handVal= Util.computeValue(this.hand);
 		float FOLDING_THRESHOLD = (float).05;
 		if(this.hand.getAllCards().size() ==2)
 			FOLDING_THRESHOLD = (float)0;
@@ -165,9 +166,9 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 			CHECKING_THRESHOLD = (float).9;
 		
 		
-		float exp=findExpectedValue(Util.computeValue(this.hand),ht, this.getPot(), totalPot);
+		float exp=findExpectedValue(handVal,ht, this.getPot(), totalPot);
 	
-		if(exp < FOLDING_THRESHOLD)
+		if(exp < FOLDING_THRESHOLD || (totalPot>75 && handVal <600))
 			return new PlayerAction(ActionType.FOLD, 0);
 		
 		else if(exp<=CHECKING_THRESHOLD || betCountMaxForEachGame > 3 )
@@ -175,8 +176,8 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		
 		else {
 			betCountMaxForEachGame++;
-			if(Util.computeValue(this.hand)>=600)
-				return new PlayerAction(ActionType.BET_OR_RAISE,20);
+			if(handVal>=600)
+				return new PlayerAction(ActionType.BET_OR_RAISE,40);
 			else
 				return new PlayerAction(ActionType.BET_OR_RAISE,10);
 		}

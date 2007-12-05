@@ -2,13 +2,17 @@
 package edu.stanford.cs229.ml;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import edu.stanford.cs229.AbstractPlayer;
 import edu.stanford.cs229.ActionType;
 import edu.stanford.cs229.ApplicationException;
 import edu.stanford.cs229.Card;
+import edu.stanford.cs229.Deck;
 import edu.stanford.cs229.GameState;
+import edu.stanford.cs229.Hand;
 import edu.stanford.cs229.PlayerAction;
 import edu.stanford.cs229.ResultState;
 import edu.stanford.cs229.Util;
@@ -185,11 +189,158 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	
 	private float findExpectedValue(int key,Hashtable<Integer,Fraction> state, int amtLose, int amtWin)
 	{
+		//if(hand.getAllCards().size()>= 6)
+			//System.out.println(computeOuts());
 		Fraction val=(Fraction)state.get(key);
 		float prob= ((float)val.getNumerator()/(float)val.getDenominator());
 		
 		//return (amtWin*(prob) - amtLose*(1-prob));
 		return prob;
+	}
+	
+	private float computeOuts()
+	{
+		Deck tempDeck1= new Deck();
+		Deck tempDeck2= new Deck();
+		Deck tempDeck3 = new Deck();
+		Deck tempDeck4 = new Deck();
+		Card card1;
+		Card card2;
+		Card card3;
+		Card card4;
+		
+		int numLosses=0;
+		int numRounds=0;
+		List<Card> tableCards = hand.getTableCards();
+		List<Card> myCards = hand.getPlayerCards();
+		
+		Hand myHand= new Hand();
+		Hand opponentsHand= new Hand();
+		
+		for(int i=1; i<=52; i++)
+		{
+			
+			card1 = tempDeck1.drawCard();
+			if (tableCards.contains(card1) || myCards.contains(card1))
+				continue;
+			tempDeck2.shuffleDeck();
+			for(int j=1; j<=52; j++)
+			{
+			
+				card2=tempDeck2.drawCard();
+				if(tableCards.contains(card2) || myCards.contains(card2) || card1.equals(card2))
+					continue;
+				
+				tempDeck3.shuffleDeck();
+				if(hand.getTableCards().size() ==3)
+				{
+
+					for(int k=1; k<=52; k++)
+					{
+						
+						card3=tempDeck3.drawCard();
+						if(tableCards.contains(card3) || myCards.contains(card3) || card1.equals(card3)  || card2.equals(card3) )
+							continue;
+					
+						tempDeck4.shuffleDeck();
+						for(int l=1; l<=52; l++)
+						{
+							
+							card4=tempDeck4.drawCard();
+							if(tableCards.contains(card4) || myCards.contains(card4) || card1.equals(card4)  || card2.equals(card4)  || card3.equals(card4))
+								continue;
+							
+							myHand= new Hand();
+							opponentsHand= new Hand();
+					
+							ArrayList<Card> test1= new ArrayList<Card>();
+							test1.add(card3);
+							test1.add(card4);
+							test1.addAll(hand.getTableCards());
+							test1.addAll(hand.getPlayerCards());
+							myHand.setAllCards(test1);
+							
+						
+							ArrayList<Card> test= new ArrayList<Card>();
+							test.add(card1);
+							test.add(card2);
+							test.add(card3);
+							test.add(card4);
+							test.addAll(hand.getTableCards());
+							opponentsHand.setAllCards(test);
+						
+							Hand winningHand=Util.findWinner(myHand, opponentsHand);
+							if(winningHand!=null && winningHand.equals(opponentsHand))
+									numLosses++;
+							numRounds++;
+							
+						}
+						
+					}
+				}
+				
+				else if (hand.getTableCards().size()==4)
+				{
+					
+					for(int k=1; k<=52; k++)
+					{
+						card3=tempDeck3.drawCard();
+						if(tableCards.contains(card3) || myCards.contains(card3) || card1.equals(card3)  || card2.equals(card3) )
+							continue;
+						
+						myHand= new Hand();
+						opponentsHand= new Hand();
+				
+						ArrayList<Card> test1= new ArrayList<Card>();
+						test1.add(card3);
+						test1.addAll(hand.getTableCards());
+						test1.addAll(hand.getPlayerCards());
+						myHand.setAllCards(test1);
+						
+					
+						ArrayList<Card> test= new ArrayList<Card>();
+						test.add(card1);
+						test.add(card2);
+						test.add(card3);
+						test.addAll(hand.getTableCards());
+						opponentsHand.setAllCards(test);
+					
+						
+						Hand winningHand=Util.findWinner(myHand, opponentsHand);
+						if(winningHand!=null && winningHand.equals(opponentsHand))
+								numLosses++;
+						numRounds++;
+						
+						
+					}
+				}
+				else
+				{
+					myHand= new Hand();
+					opponentsHand= new Hand();
+			
+					myHand.setAllCards(hand.getAllCards());
+					
+					ArrayList<Card> test= new ArrayList<Card>();
+					test.add(card1);
+					test.add(card2);
+					test.addAll(hand.getTableCards());
+					opponentsHand.setAllCards(test);
+					
+					
+					Hand winningHand=Util.findWinner(myHand, opponentsHand);
+					if(winningHand!=null && winningHand.equals(opponentsHand))
+							numLosses++;
+					numRounds++;
+					
+					
+				}
+				
+			}
+		}
+		
+		
+		return (float)numLosses/(float)numRounds;
 	}
 	
 	/**

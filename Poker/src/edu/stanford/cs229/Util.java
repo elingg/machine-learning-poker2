@@ -72,10 +72,10 @@ public class Util {
 	{	
 		List<Card> Hand1 = findBestCards(hand1);
 		List<Card> Hand2 = findBestCards(hand2);
-		System.out.println("Best Hand 1:"+Hand1+" Best Hand 2:"+Hand2);
+		//System.out.println("Best Hand 1:"+Hand1+" Best Hand 2:"+Hand2);
 		int hand1val = hand1.getValue();
 		int hand2val = hand2.getValue();
-		System.out.println(hand1val + "  " + hand2val);
+		//System.out.println(hand1val + "  " + hand2val);
 		if (hand1val > hand2val)
 			return hand1;
 		else if (hand2val > hand1val)

@@ -158,19 +158,40 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	 */
 	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht, int totalPot)
 	{
+		float FOLDING_THRESHOLD=(float).05;
+		float CHECKING_THRESHOLD=(float).75;
+		float exp=(float).5;
+		
 		int handVal= Util.computeValue(this.hand);
-		float FOLDING_THRESHOLD = (float).05;
+		
+		if(hand.getAllCards().size()>=6)
+		{
+			FOLDING_THRESHOLD=(float).2;
+			CHECKING_THRESHOLD=(float).7;
+			
+			exp= computeOuts();
+			
+			if(((float)(strengthOfOpponent.getNumerator()/ strengthOfOpponent.getDenominator()) >.6) || this.getBankroll() <=850)
+				CHECKING_THRESHOLD = (float).8;
+		}
+		
+		else
+		{
+
+		FOLDING_THRESHOLD = (float).05;
+		
 		if(this.hand.getAllCards().size() ==2)
 			FOLDING_THRESHOLD = (float)0;
 		
+		CHECKING_THRESHOLD = (float).75;
 		
-		float CHECKING_THRESHOLD = (float).75;
+		exp=findExpectedValue(handVal,ht, this.getPot(), totalPot);
 		
 		if(((float)(strengthOfOpponent.getNumerator()/ strengthOfOpponent.getDenominator()) >.6) || this.getBankroll() <=850)
 			CHECKING_THRESHOLD = (float).9;
 		
+		}
 		
-		float exp=findExpectedValue(handVal,ht, this.getPot(), totalPot);
 	
 		if(exp < FOLDING_THRESHOLD || (totalPot>120 && handVal <600))
 			return new PlayerAction(ActionType.FOLD, 0);
@@ -189,8 +210,6 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	
 	private float findExpectedValue(int key,Hashtable<Integer,Fraction> state, int amtLose, int amtWin)
 	{
-		//if(hand.getAllCards().size()>= 6)
-			//System.out.println(computeOuts());
 		Fraction val=(Fraction)state.get(key);
 		float prob= ((float)val.getNumerator()/(float)val.getDenominator());
 		
@@ -345,7 +364,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	
 	/**
 	 * Writes results for each state hashtable
-	 *
+	 *i 
 	 */
 	public void debugResults()
 	{

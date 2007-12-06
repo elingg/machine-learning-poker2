@@ -169,7 +169,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 			FOLDING_THRESHOLD=(float).2;
 			CHECKING_THRESHOLD=(float).7;
 			
-			exp= computeOuts();
+			exp= 1-computeOuts();
 			
 			if(((float)(strengthOfOpponent.getNumerator()/ strengthOfOpponent.getDenominator()) >.6) || this.getBankroll() <=850)
 				CHECKING_THRESHOLD = (float).8;

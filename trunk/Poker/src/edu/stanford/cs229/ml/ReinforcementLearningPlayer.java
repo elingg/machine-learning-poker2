@@ -204,7 +204,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 			if(handVal>=600)
 				return new PlayerAction(ActionType.BET_OR_RAISE,60);
 			else
-				return new PlayerAction(ActionType.BET_OR_RAISE,10);
+				return new PlayerAction(ActionType.BET_OR_RAISE,30);
 		}
 	}
 	

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 
 import edu.stanford.cs229.AbstractPlayer;
 import edu.stanford.cs229.ActionType;
@@ -161,6 +162,8 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		float FOLDING_THRESHOLD=(float).05;
 		float CHECKING_THRESHOLD=(float).75;
 		float exp=(float).5;
+		Random rand= new Random();
+		float fuzzy= rand.nextFloat();
 		
 		int handVal= Util.computeValue(this.hand);
 		
@@ -192,12 +195,20 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		
 		}
 		
-	
-		if(exp < FOLDING_THRESHOLD || (totalPot>120 && handVal <600))
+
+		if(exp < FOLDING_THRESHOLD || (totalPot>120 && handVal <600 && fuzzy > .2))
 			return new PlayerAction(ActionType.FOLD, 0);
 		
 		else if(exp<=CHECKING_THRESHOLD || betCountMaxForEachGame > 3 )
 		return new PlayerAction(ActionType.CHECK_OR_CALL,0);
+		
+		else if(fuzzy < .31 && exp >.5)
+		{
+			if(fuzzy<.10)
+			 return new PlayerAction(ActionType.BET_OR_RAISE,30);
+			else
+				return new PlayerAction(ActionType.BET_OR_RAISE,10);
+		}
 		
 		else {
 			betCountMaxForEachGame++;

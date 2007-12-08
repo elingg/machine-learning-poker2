@@ -117,14 +117,20 @@ public class PlayerActivityRecord {
 					return name + " checks";
 				}
 		} else {
+			//Qualify the winner with the type of hand (e.g. full house or two pair)
+			String qualifier = "";
+			if(hand.getPlayerCards().size() + hand.getTableCards().size() >= 7) {
+				qualifier = "(with " + Util.getHandValueAsString(hand) + ")";
+			}
+			
 			if (resultState == ResultState.WIN) {
-				return "<b>" + name + " wins!</b>";
+				return "<b>" + name + " wins " + qualifier + "!</b>";
 			}
 			if (resultState == ResultState.TIE) {
-				return "<b>" + name + " ties</b>";
+				return "<b>" + name + " ties " + qualifier + "</b>";
 			}
 			if (resultState == ResultState.LOSE) {
-				return "<b>" + name + " loses</b>";
+				return "<b>" + name + " loses " + qualifier + " </b>";
 			}
 		}
 		throw new RuntimeException("PlayeActivityRecord is malformed");		

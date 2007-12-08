@@ -29,6 +29,9 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
  public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
+	public static String LOG_DIR = "/tmp/poker/"; 
+	//public static String LOG_DIR = "c:/";
+	
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
 	private static boolean loggersSetup = false;
 	
@@ -45,7 +48,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		process(request, response);
-	}  	
+	}
 	
 	/**
 	 * Post Web interface
@@ -99,6 +102,12 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 			//Process the player actions
 			String actionStr = request.getParameter(Constants.ACTION_TYPE_PARAMETER);
 			String bet = request.getParameter(Constants.BET_PARAMETER);
+			
+			//If the human player tries to bet more than 1000, reset it to 1000
+			if(Integer.parseInt(bet) > 1000) {
+				bet = "1000";
+			}
+			
 			if(actionStr != null && !actionStr.equals("")) {
 				Long responseTime = System.currentTimeMillis() - (Long) session.getAttribute(Constants.TIMESTAMP);
 				processPlayerAction(player, actionStr, bet, responseTime);
@@ -142,8 +151,9 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 
-		RandomPlayer player1 = new RandomPlayer(Constants.WEBAPP_OPPONENT_NAME);
-		//AbstractPlayer player1 = getComputerPlayer();
+		//RandomPlayer player1 = new RandomPlayer(Constants.WEBAPP_OPPONENT_NAME);
+		AbstractPlayer player1 = getComputerPlayer();
+		player1.setId("Computer-" + id);
 		
 		WebPlayer player2 = new WebPlayer(name, id);
 		players.add(player1);
@@ -180,7 +190,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		try {
 			ObjectInput input = new ObjectInputStream(buffer);
 			ReinforcementLearningPlayer player = (ReinforcementLearningPlayer) input.readObject();
-			
+			player.resetBankroll();
 			return player;
 		} catch(ClassNotFoundException e) {
 			throw new ServletException(e);
@@ -209,8 +219,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	        // Create an appending file handler
 			try {
 				boolean append = true;
-				FileHandler fileHandler = new FileHandler("c:/PlayerActivityRecord.log", append);
-				//FileHandler fileHandler = new FileHandler("/tmp/poker/PlayerActivityRecord.log", append);
+				FileHandler fileHandler = new FileHandler(LOG_DIR + "PlayerActivityRecord.log", append);
 				fileHandler.setFormatter(new LogFormatter());
 				fileHandler.setLevel(Level.FINEST);
 				//Add to the desired logger

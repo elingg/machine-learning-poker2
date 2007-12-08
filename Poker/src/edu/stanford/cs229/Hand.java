@@ -298,13 +298,13 @@ public class Hand implements Serializable {
 		tripCards = isThreeKind();
 		if(tripCards!=null)	// if there is a three of a kind, two pair doesnt count any more.
 				return null;
-		for(int i=0; i<tempCards.size()-1; i++)
+		for(int i=tempCards.size()-1; i>=1; i--)
 		{
-			if(tempCards.get(i).getValue() ==tempCards.get(i+1).getValue())
+			if(tempCards.get(i).getValue() ==tempCards.get(i-1).getValue())
 			{
 				tempList.add(tempCards.get(i));
-				tempCards.remove(i+1);
 				tempCards.remove(i);
+				tempCards.remove(i-1);
 				i--;				
 				numPairs++;
 				if(numPairs==2)

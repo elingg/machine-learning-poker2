@@ -232,7 +232,7 @@ public class Util {
 							test1.addAll(hand.getPlayerCards());
 							myHand.setAllCards(test1);
 							
-						
+		
 							ArrayList<Card> test= new ArrayList<Card>();
 							test.add(card1);
 							test.add(card2);

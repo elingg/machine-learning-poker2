@@ -120,7 +120,7 @@ public class PlayerActivityRecord {
 			//Qualify the winner with the type of hand (e.g. full house or two pair)
 			String qualifier = "";
 			if(hand.getPlayerCards().size() + hand.getTableCards().size() >= 7) {
-				qualifier = "(with " + Util.getHandValueAsString(hand) + ")";
+				qualifier = "(with " + UtilMessage.getHandValueAsString(hand) + ")";
 			}
 			
 			if (resultState == ResultState.WIN) {

@@ -29,8 +29,8 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
  public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
-	public static String LOG_DIR = "/tmp/poker/"; 
-	//public static String LOG_DIR = "c:/";
+	//public static String LOG_DIR = "/tmp/poker/"; 
+	public static String LOG_DIR = "c:/";
 	
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
 	private static boolean loggersSetup = false;
@@ -42,6 +42,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		super();
 		setupLogger();
 	}   	
+	
 	
 	/**
 	 * GET Web interface
@@ -104,8 +105,12 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 			String bet = request.getParameter(Constants.BET_PARAMETER);
 			
 			//If the human player tries to bet more than 1000, reset it to 1000
-			if(Integer.parseInt(bet) > 1000) {
-				bet = "1000";
+			try {
+				if(Integer.parseInt(bet) > 1000) {
+					bet = "1000";
+				}
+			} catch(NumberFormatException e) {
+				
 			}
 			
 			if(actionStr != null && !actionStr.equals("")) {

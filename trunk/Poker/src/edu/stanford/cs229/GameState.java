@@ -71,9 +71,18 @@ public class GameState {
 		
 		if(opponent.getName().equals(a.getName()) && (playerAction.getActionType() == ActionType.BET_OR_RAISE)) {
 			return playerAction.getBet();
-		} else {		
+		} else {
 			return 0;
 		}
+	}
+	
+	/**
+	 * Returns true if the player passed in is the big blind.
+	 * @param me
+	 * @return
+	 */
+	public boolean isBigBlind(AbstractPlayer me) {
+		return playerActivityRecords.get(1).getName().equals(me.getName());
 	}
 	
 	/**
@@ -144,5 +153,6 @@ public class GameState {
 			return true;
 		}		
 	}
+	
 	
 }

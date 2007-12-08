@@ -105,7 +105,7 @@ public class Util {
 					return hand2;
 				return null; // Two full-houses cannot be equal
 			} else if (hand1val == 500) {
-				for (int i = 4; i <= 0; i--) {
+				for (int i = 4; i >= 0; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
 						return hand1;
 					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())

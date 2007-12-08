@@ -27,7 +27,7 @@ public class Game extends Thread {
 	/* START OF CONFIGURATION SETTINGS */
 	
 	//Interactive mode
-	private final static boolean INTERACTIVE_MODE = false;
+	private final static boolean INTERACTIVE_MODE = true;
 
 	//Load the player from disk?
 	private final static boolean RESTORE_PLAYERS = false;  

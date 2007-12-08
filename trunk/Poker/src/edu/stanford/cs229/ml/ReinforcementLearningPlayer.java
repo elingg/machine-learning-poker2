@@ -200,7 +200,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		if(opponentBet > 99 && exp < .9)
 			return new PlayerAction(ActionType.FOLD, 0);
 		
-		else if(exp < FOLDING_THRESHOLD || (totalPot + opponentBet > 100 && exp < .7 && fuzzy > .2))
+		else if((exp < FOLDING_THRESHOLD && opponentBet >0) || (totalPot + opponentBet > 100 && opponentBet >0 && exp < .7 && fuzzy > .2))
 			return new PlayerAction(ActionType.FOLD, 0);
 		
 		else if(exp<=CHECKING_THRESHOLD || betCountMaxForEachGame > 3 )

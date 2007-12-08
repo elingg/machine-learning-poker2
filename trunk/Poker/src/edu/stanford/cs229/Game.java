@@ -27,13 +27,13 @@ public class Game extends Thread {
 	/* START OF CONFIGURATION SETTINGS */
 	
 	//Interactive mode
-	private final static boolean INTERACTIVE_MODE = true;
+	private final static boolean INTERACTIVE_MODE = false;
 
 	//Load the player from disk?
 	private final static boolean RESTORE_PLAYERS = false;  
 	
 	//Number of games to be played
-	private final static int MAX_RUNS = 100000;
+	private final static int MAX_RUNS = 1;
 	
 	private final static int BLIND_AMOUNT = 5; 
 	

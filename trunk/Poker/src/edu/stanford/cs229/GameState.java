@@ -56,6 +56,27 @@ public class GameState {
 	}
 	
 	/**
+	 * Return's opponent's bet, as a convenient method. If the opponent folds,
+	 * checks, or calls, this returns 0. Otherwise, it will return the amount
+	 * that the player bet.
+	 * 
+	 * @param me
+	 * @return
+	 */
+	public int getOpponentBet(AbstractPlayer me) {
+		AbstractPlayer opponent = getOpponent(me);
+		
+		PlayerActivityRecord a = playerActivityRecords.get(playerActivityRecords.size() - 1);
+		PlayerAction playerAction = a.getPlayerAction();
+		
+		if(opponent.getName().equals(a.getName()) && (playerAction.getActionType() == ActionType.BET_OR_RAISE)) {
+			return playerAction.getBet();
+		} else {		
+			return 0;
+		}
+	}
+	
+	/**
 	 * Adds a player activity record.  This is used by the game engine only.
 	 * @param record
 	 */

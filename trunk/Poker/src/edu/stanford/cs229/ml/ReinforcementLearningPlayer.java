@@ -138,15 +138,15 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	
 	@Override
 	public PlayerAction getAction(GameState state) throws ApplicationException {
-		int totalPot = state.getTotalPot();
+		
 		if(this.hand.getAllCards().size() == 2) 
-			return getActionAfterNumCards(this.initialState, totalPot);
+			return getActionAfterNumCards(this.initialState, state);
 		else if (this.hand.getAllCards().size()==5)
-			return getActionAfterNumCards(this.fiveCardState, totalPot);
+			return getActionAfterNumCards(this.fiveCardState, state);
 		else if (this.hand.getAllCards().size()==6)
-			return getActionAfterNumCards(this.sixCardState, totalPot);
+			return getActionAfterNumCards(this.sixCardState,state);
 		else if (this.hand.getAllCards().size()==7)
-			return getActionAfterNumCards(this.sevenCardState, totalPot);
+			return getActionAfterNumCards(this.sevenCardState,state);
 
 		System.err.println(this.hand.getAllCards().size() + "is not a valid value");
 		return null;		
@@ -157,13 +157,15 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	 * @param ht
 	 * @return
 	 */
-	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht, int totalPot)
+	public PlayerAction getActionAfterNumCards(Hashtable<Integer, Fraction> ht, GameState state)
 	{
 		float FOLDING_THRESHOLD=(float).05;
 		float CHECKING_THRESHOLD=(float).75;
 		float exp=(float).5;
 		Random rand= new Random();
 		float fuzzy= rand.nextFloat();
+		int totalPot = state.getTotalPot();
+		float opponentBet = state.getOpponentBet(this);
 		
 		int handVal= Util.computeValue(this.hand);
 		
@@ -195,17 +197,19 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		
 		}
 		
-
-		if(exp < FOLDING_THRESHOLD || (totalPot>120 && exp < .7 && fuzzy > .2))
+		if(opponentBet > 150 && exp < .9)
+			return new PlayerAction(ActionType.FOLD, 0);
+		
+		else if(exp < FOLDING_THRESHOLD || (totalPot + opponentBet > 120 && exp < .7 && fuzzy > .2))
 			return new PlayerAction(ActionType.FOLD, 0);
 		
 		else if(exp<=CHECKING_THRESHOLD || betCountMaxForEachGame > 3 )
-		return new PlayerAction(ActionType.CHECK_OR_CALL,0);
+		    return new PlayerAction(ActionType.CHECK_OR_CALL,0);
 		
 		else if(fuzzy < .31 && exp >.5)
 		{
 			if(fuzzy<.10)
-			 return new PlayerAction(ActionType.BET_OR_RAISE,30);
+			    return new PlayerAction(ActionType.BET_OR_RAISE,30);
 			else
 				return new PlayerAction(ActionType.BET_OR_RAISE,10);
 		}

@@ -20,6 +20,9 @@ public class HumanPlayer extends AbstractPlayer {
 			InputStreamReader isr = new InputStreamReader(System.in);
 			BufferedReader stdin = new BufferedReader(isr);
 			
+			//System.out.println("Opponent bet: " + state.getOpponentBet(this));
+			//System.out.println("Am I big blind?: " + state.isBigBlind(this));
+			
 			while (true) {
 				System.out.print("(c)heck or call/(f)old/(b)et or raise?");
 				String actionType = stdin.readLine();

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import edu.stanford.cs229.ml.MLPlayer;
 import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
 /**
@@ -30,7 +31,7 @@ public class Game extends Thread {
 	private final static boolean INTERACTIVE_MODE = true;
 
 	//Load the player from disk?
-	private final static boolean RESTORE_PLAYERS = false;  
+	private final static boolean RESTORE_PLAYERS = true;  
 	
 	//Number of games to be played
 	private final static int MAX_RUNS = 1;
@@ -80,18 +81,18 @@ public class Game extends Thread {
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 		
 		if(INTERACTIVE_MODE) {
-			RandomPlayer dealer = new RandomPlayer("Andrew");
+			MLPlayer dealer = new MLPlayer("Andrew");
 			HumanPlayer player = new HumanPlayer("Alec");
 			players.add(dealer);
 			players.add(player);
 		} else if(RESTORE_PLAYERS) {
-			ReinforcementLearningPlayer player1 = deserializePlayer("Elizabeth");
-			ReinforcementLearningPlayer player2 = deserializePlayer("Alec");
+			MLPlayer player1 = deserializePlayer("Elizabeth");
+			MLPlayer player2 = deserializePlayer("Alec");
 			players.add(player1);
 			players.add(player2);
 		} else {
-			ReinforcementLearningPlayer player1 = new ReinforcementLearningPlayer("Elizabeth");
-			ReinforcementLearningPlayer player2 = new ReinforcementLearningPlayer("Computer");
+			MLPlayer player1 = new MLPlayer("Elizabeth");
+			MLPlayer player2 = new MLPlayer("Computer");
 			players.add(player1);
 			players.add(player2);
 		}
@@ -443,13 +444,13 @@ public class Game extends Thread {
 	 * @return
 	 * @throws ApplicationException
 	 */
-	private static ReinforcementLearningPlayer deserializePlayer(String name) throws ApplicationException {
+	private static MLPlayer deserializePlayer(String name) throws ApplicationException {
 		ObjectInput input = null;
 		try {
 	      InputStream file = new FileInputStream(name);
 	      InputStream buffer = new BufferedInputStream(file);
 	      input = new ObjectInputStream ( buffer );
-	      ReinforcementLearningPlayer player = (ReinforcementLearningPlayer) input.readObject();
+	      MLPlayer player = (MLPlayer) input.readObject();
 	      return player;
 		} catch(IOException e) {
 			throw new ApplicationException(e);

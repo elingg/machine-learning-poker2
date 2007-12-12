@@ -34,7 +34,7 @@ public class Game extends Thread {
 	private final static boolean RESTORE_PLAYERS = true;  
 	
 	//Number of games to be played
-	private final static int MAX_RUNS = 1;
+	private final static int MAX_RUNS = 10;
 	
 	private final static int BLIND_AMOUNT = 5; 
 	

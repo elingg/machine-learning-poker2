@@ -14,6 +14,8 @@ public class Util {
 	static final int pair=100;
 	static final int highcard = 0;
 	
+	static List<Card> allCards = new ArrayList<Card>();;
+	
 	/**
 	 * Private constructor ensures that this is never instantiated
 	 *
@@ -125,25 +127,27 @@ public class Util {
 					return hand2;
 				return null; // two three of a kinds cannot be equal
 			} else if (hand1val == 200) {
-				if (Hand1.get(1).getValue() > Hand2.get(1).getValue())
-					return hand1;
-				else if (Hand1.get(1).getValue() < Hand2.get(1).getValue())
-					return hand2;
-				else if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
+				if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				else if (Hand1.get(2).getValue() > Hand2.get(2).getValue())
+				else if (Hand1.get(1).getValue() > Hand2.get(1).getValue())
 					return hand1;
-				else if (Hand1.get(2).getValue() < Hand2.get(2).getValue())
+				else if (Hand1.get(1).getValue() < Hand2.get(1).getValue())
 					return hand2;
+				else if(Hand1.size()>=3){
+					if (Hand1.get(2).getValue() > Hand2.get(2).getValue())
+						return hand1;
+					else if (Hand1.get(2).getValue() < Hand2.get(2).getValue())
+						return hand2;
+				}
 				return null;
 			} else if (hand1val == 100) {
 				if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				for (int i = 3; i >= 1; i--) {
+				for (int i = Hand1.size()-1; i >= 1; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
 						return hand1;
 					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())
@@ -151,7 +155,7 @@ public class Util {
 				}
 				return null;
 			} else {
-				for (int i = 4; i>= 0; i--) {
+				for (int i = Hand1.size()-1; i>= 0; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
 						return hand1;
 					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())
@@ -168,6 +172,55 @@ public class Util {
 		List<Card> bestHand = findBestCards(hand);
 		int handval = hand.getValue();
 		return handval;
+	}
+	
+	public static float computeWinProbability (Hand hand){
+		List<Card> tableCards = hand.getTableCards();
+		List<Card> playerCards = hand.getPlayerCards();
+		int totalHands = 0;
+		int betterHands = 0;
+		Card temp;
+		//System.out.println(twoCardHands.size());
+		if(allCards.size()==0){
+			for(int i = 2; i<=14; i++){
+				for(int j = 1; j<=4; j++){
+					Card c = new Card(i,j);
+					allCards.add(c);
+				}
+			}
+		}
+		int isDuplicate =0;
+		for(int i=0; i<allCards.size()-1; i++){
+			for(int j=i+1; j<allCards.size(); j++){
+						Card c1 = allCards.get(i);
+						Card c2 = allCards.get(j);
+						isDuplicate = 0;
+						//twoCardHands.add(temp);
+						for(int k = 0; k< tableCards.size(); k++)
+							if( (c1.getSuit()== tableCards.get(k).getSuit() && c1.getValue()== tableCards.get(k).getValue()) || (c2.getSuit()== tableCards.get(k).getSuit() && c2.getValue()== tableCards.get(k).getValue()) ){
+								isDuplicate =1;
+								break;
+							}
+						for(int k = 0; k< playerCards.size(); k++)
+							if( (c1.getSuit()== playerCards.get(k).getSuit() && c1.getValue()== playerCards.get(k).getValue()) || (c2.getSuit()== playerCards.get(k).getSuit() && c2.getValue()== playerCards.get(k).getValue()) ){
+								isDuplicate = 1;
+								break;
+							}
+						if(isDuplicate==1)
+							continue;
+						Hand oppHand = new Hand();
+						oppHand.addPlayerCard(c1);
+						oppHand.addPlayerCard(c2);
+						for(int m=0; m<tableCards.size(); m++)
+							oppHand.addTableCard(tableCards.get(m));
+						Hand winningHand = Util.findWinner(hand, oppHand);
+						if(winningHand == oppHand)
+							betterHands++;
+						totalHands++;
+			}
+		}
+		//System.out.println(totalHands);
+		return ( 1 - ( (float) betterHands/ (float) totalHands ) );
 	}
 	
 	public static float computeOuts(Hand hand)

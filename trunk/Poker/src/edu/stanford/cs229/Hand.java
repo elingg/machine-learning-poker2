@@ -228,12 +228,10 @@ public class Hand implements Serializable {
 		
 		if(tempList1 != null && tempList2 !=null && tempList2.get(0)!=tempList1.get(0))
 		{
-			
-			tempList1.remove(2);
-			tempList1.remove(1);
-			tempList1.add(tempList2.get(0));
+			tempList.add(tempList1.get(0));
+			tempList.add(tempList2.get(0));
 			// returns the trip card followed by the pair card. Eg. (3,4,4,4,7,K,K) -> [4,K]
-			return tempList1;
+			return tempList;
 		}
 		return null;
 	}
@@ -246,12 +244,12 @@ public class Hand implements Serializable {
 		{
 			if(allCards.get(i).getValue() ==allCards.get(i-1).getValue() && allCards.get(i-1).getValue() ==allCards.get(i-2).getValue()  && allCards.get(i-2).getValue() ==allCards.get(i-3).getValue() )
 			{	
-				tempList.add(allCards.get(i-3));	
+				tempList.add(allCards.get(i-3));
 				if(i==allCards.size()-1) // if the top card is the quad card
 					if(i>=4)
 						tempList.add(allCards.get(i-4));	// Kicker card
 				else tempList.add(allCards.get(allCards.size()-1));
-				// 2 cards are returned, 1st is quad card, 2nd is the kicker (kicker doesn't really matter here)
+				// 2 cards are returned, 1st is quad card, 2nd is the kicker (kicker doesn't really matter here), if there are only 4 cards then one of them is returned (since have same face value)
 				return tempList;
 			}
 				
@@ -279,6 +277,8 @@ public class Hand implements Serializable {
 					tempList.add(tempCards.get(tempCards.size()-2));
 					tempList.add(tempCards.get(tempCards.size()-1));
 				}
+				else if(tempCards.size()>=1)
+					tempList.add(tempCards.get(tempCards.size()-1));
 				// returns 3 cards - 1st the trip card and then the top two kickers (kickers don't really matter here). Eg. if the hand is (4,6,6,6,J,K,A), [6,K,A] is returned
 				return tempList;
 			}
@@ -311,7 +311,7 @@ public class Hand implements Serializable {
 				{
 					if(tempCards.size()>=1)
 						tempList.add(tempCards.get(tempCards.size()-1));
-					// 3 cards are returned. 1st two are sorted pair cards and third is kicker. Eg. if hand is (4,4,6,6,J,K,A), then [4,6,A] is returned
+					// 3 cards are returned. 1st two are sorted pair cards and third is kicker. Eg. if hand is (4,4,6,6,J,K,A), then [6,4,A] is returned
 					return tempList;
 				}
 			}
@@ -349,8 +349,15 @@ public class Hand implements Serializable {
 					tempList.add(tempCards.get(tempCards.size()-2));
 					tempList.add(tempCards.get(tempCards.size()-1));
 				}
-				// 4 cards are returned, 1st is the pair card, last 3 are the kickers
-				return tempList; // for a full-house, only the pair card is returned
+				else if(tripCards==null && tempCards.size()>=2){
+					tempList.add(tempCards.get(tempCards.size()-3));
+					tempList.add(tempCards.get(tempCards.size()-2));
+				}
+				else if(tripCards==null && tempCards.size()>=1){
+					tempList.add(tempCards.get(tempCards.size()-1));
+				}
+				// 4 cards are returned, 1st is the pair card, last 3 are the kickers - if there are less than 5 cards, all are returned.
+				return tempList; // for a full-house call, the trip card is not returned
 			}
 		}
 

@@ -14,7 +14,7 @@ public class Util {
 	static final int pair=100;
 	static final int highcard = 0;
 	
-	static List<Card> allCards = new ArrayList<Card>();;
+	
 	
 	/**
 	 * Private constructor ensures that this is never instantiated
@@ -175,6 +175,8 @@ public class Util {
 	}
 	
 	public static float computeWinProbability (Hand hand){
+		
+		List<Card> allCards = new ArrayList<Card>();
 		List<Card> tableCards = hand.getTableCards();
 		List<Card> playerCards = hand.getPlayerCards();
 		int totalHands = 0;

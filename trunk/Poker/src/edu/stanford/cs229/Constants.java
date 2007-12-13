@@ -9,6 +9,7 @@ public class Constants {
 	public static String BET_PARAMETER = "bet";
 	public static String PLAY_AGAIN_PARAMETER = "playAgain";
 	public static String END_OF_GAME_PARAMETER = "isEndOfGame";
+	public static String BOT_PARAMETER = "bot";
 	public static String WEB_PLAYER = "webPlayer";
 	public static String TIMESTAMP = "timestamp";
 	public static String CHECK_LABEL = "Check";
@@ -18,6 +19,6 @@ public class Constants {
 	public static String IS_FACEBOOK = "isFacebook";
 	public static String TRUE = "true";
 	public static String FALSE = "false";
-	
+	public static String DESERIALIZE_BOT_PARAMETER = "deserialize";
 	public static String WEBAPP_OPPONENT_NAME = "Computer";
 }

@@ -31,7 +31,7 @@ public abstract class AbstractPlayer implements Serializable {
 	
 	private String id;
 	
-	private final String name;
+	private String name;
 
 	protected Hand hand;
 
@@ -72,6 +72,14 @@ public abstract class AbstractPlayer implements Serializable {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * Sets name of bot
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**

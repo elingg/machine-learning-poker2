@@ -29,8 +29,16 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
  public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
-	//public static String LOG_DIR = "/tmp/poker/"; 
-	public static String LOG_DIR = "c:/";
+	/**
+	 * Deployment steps:
+	 * 1. Change log dir here
+	 * 2. Make sure max games in Game.java is high
+	 */
+	public static String LOG_DIR = "/tmp/poker/"; 
+	//public static String LOG_DIR = "c:/";
+	
+	private static String DEFAULT_BOT_CLASS = "MLPlayer";
+	private static String DEFAULT_BOT_PACKAGE = "edu.stanford.cs229.ml";
 	
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
 	private static boolean loggersSetup = false;
@@ -41,8 +49,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	public PokerServlet() {
 		super();
 		setupLogger();
-	}   	
-	
+	}
 	
 	/**
 	 * GET Web interface
@@ -77,24 +84,38 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
 			//Set up a new game, if there is no Game object in the seesion
 			if (session.getAttribute(Constants.GAME_ATTRIBUTE) == null) {
+				
+				//Get the Java Class of the bot
+				String botClassName = request.getParameter(Constants.BOT_PARAMETER);
+				if(botClassName == null || botClassName.equals("")) {
+					botClassName = DEFAULT_BOT_CLASS;  //default is MLPlayer
+				}
+				
+				//Get whether to deserialize the bot from disk
+				boolean deserializeBot = false;
+				String deserializeBotParameter = request.getParameter(Constants.DESERIALIZE_BOT_PARAMETER);
+				if(deserializeBotParameter != null && deserializeBotParameter.equals("1")) {
+					deserializeBot = true;
+				}
+				
 				Object isFacebook = request.getAttribute(Constants.IS_FACEBOOK);
 				if(isFacebook == null) {
 					//Non-Facebook
 					System.out.println("Non Facebook");
 					String name = request.getParameter(Constants.NAME_PARAMETER);
-					String id = request.getRemoteAddr();
-					processNewGame(id, name, session);
+					String id = name + request.getRemoteAddr() + botClassName;
+					processNewGame(id, name, botClassName, deserializeBot, session);
 				} else {
 					System.out.println("Facebook");
 					
 					//Facebook
 					String name = (String) request.getAttribute(Constants.NAME_PARAMETER);
-					String id = ((Integer) request.getAttribute(Constants.ID_PARAMETER)).toString();
+					String id = ((Integer) request.getAttribute(Constants.ID_PARAMETER)).toString() + botClassName;
 					
 					System.out.println("Name: " + name);
 					System.out.println("ID: " + id);
 					
-					processNewGame(id, name, session);
+					processNewGame(id, name, botClassName, deserializeBot, session);
 				}
 			} 
 			
@@ -141,28 +162,42 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	
 	/**
 	 * Sets up a new game
-	 * @param id
-	 * @param name
+	 * @param playerId
+	 * @param playerName
 	 * @param session
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public void processNewGame(String id, String name, HttpSession session) throws ServletException, IOException {
+	public void processNewGame(String playerId, String playerName, String botClassName, boolean deserializeBot, HttpSession session) throws ServletException, IOException {
 		//Create game if it has not been set up for this session
 		
-		if(name == null || name.equals("")) {
-			name = "Guest";
+		if(playerName == null || playerName.equals("")) {
+			playerName = "Guest";
 		}
 		
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
 
-		//RandomPlayer player1 = new RandomPlayer(Constants.WEBAPP_OPPONENT_NAME);
-		AbstractPlayer player1 = getComputerPlayer();
-		player1.setId("Computer-" + id);
-		
-		WebPlayer player2 = new WebPlayer(name, id);
+		AbstractPlayer player1 = null;
+		if (deserializeBot) {
+			//Deserialize the bot from disk
+			player1 = getComputerPlayer(botClassName);
+			player1.setName(botClassName);
+
+		} else {
+			//Instantiate a new class dynamically
+			String fullClassName = DEFAULT_BOT_PACKAGE + "." + botClassName;
+			try {
+				player1 = Game.generatePlayer(fullClassName, botClassName);
+			} catch (ApplicationException e) {
+				throw new ServletException(e);
+			}
+		}
+		player1.setId("Computer-" + playerId);
 		players.add(player1);
+		
+		WebPlayer player2 = new WebPlayer(playerName, playerId);
 		players.add(player2);
+		
 		Game game = new Game(players);
 		game.start();
 		session.setAttribute(Constants.GAME_ATTRIBUTE, game);
@@ -188,9 +223,9 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		}
 	}
 	
-	public AbstractPlayer getComputerPlayer() throws ServletException {
-		String SAVED_PLAYER = "Computer";
-		InputStream is = this.getClass().getResourceAsStream(SAVED_PLAYER);
+	public AbstractPlayer getComputerPlayer(String filename) throws ServletException {
+		System.out.println("Deserializing " + filename);
+		InputStream is = this.getClass().getResourceAsStream(filename);
 		InputStream buffer = new BufferedInputStream(is);
 		try {
 			ObjectInput input = new ObjectInputStream(buffer);

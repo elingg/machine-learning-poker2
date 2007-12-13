@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -26,21 +29,25 @@ public class Game extends Thread {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
 	
 	/* START OF CONFIGURATION SETTINGS */
+	//private final static String classPlayer1 = "edu.stanford.cs229.HumanPlayer";
+	private final static String classPlayer1 = "edu.stanford.cs229.ml.ReinforcementLearningPlayer";
+	private final static String classPlayer2 = "edu.stanford.cs229.ml.ReinforcementLearningPlayer";
 	
-	//Interactive mode
-	private final static boolean INTERACTIVE_MODE = true;
-
+	//Names of the players
+	private final static String namePlayer1 = "Player1";
+	private final static String namePlayer2 = "Player2";
+	
 	//Load the player from disk?
-	private final static boolean RESTORE_PLAYERS = true;  
+	private final static boolean RESTORE_PLAYERS = false;  
 	
-	//Number of games to be played
-	private final static int MAX_RUNS = 10;
+	//Maximum number of games to be played
+	private final static int MAX_RUNS = 100000;
 	
 	private final static int BLIND_AMOUNT = 5; 
 	
 	/* END OF CONFIGURATION SETTINGS */
 	
-	private int numRuns = 0; // number of rounds to be played
+	private int numRuns = 0;  //number of games played
 
 	private List<AbstractPlayer> players;
 
@@ -74,32 +81,47 @@ public class Game extends Thread {
 	 * @throws ApplicationException
 	 */
 	public static void main(String[] args) throws ApplicationException {
-		//Set up the logging config
-		//TODO: Fix the following.
-		System.setProperty("java.util.logging.config.file", "logging.properties");
-		
+		// Set up the logging config
+		// TODO: Fix the following.
+		System.setProperty("java.util.logging.config.file",
+				"logging.properties");
+
 		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
-		
-		if(INTERACTIVE_MODE) {
-			MLPlayer dealer = new MLPlayer("Andrew");
-			HumanPlayer player = new HumanPlayer("Alec");
-			players.add(dealer);
-			players.add(player);
-		} else if(RESTORE_PLAYERS) {
-			MLPlayer player1 = deserializePlayer("Elizabeth");
-			MLPlayer player2 = deserializePlayer("Alec");
+
+		if (RESTORE_PLAYERS) {
+			AbstractPlayer player1 = deserializePlayer(namePlayer1);
+			AbstractPlayer player2 = deserializePlayer(namePlayer2);
 			players.add(player1);
 			players.add(player2);
 		} else {
-			MLPlayer player1 = new MLPlayer("Elizabeth");
-			MLPlayer player2 = new MLPlayer("Computer");
-			players.add(player1);
-			players.add(player2);
+			players.add(generatePlayer(classPlayer1, namePlayer1));
+			players.add(generatePlayer(classPlayer2, namePlayer2));
 		}
-		
+
 		Game game = new Game(players);
 		game.run();
-	}	
+
+	}
+
+	public static AbstractPlayer generatePlayer(String className,
+			String playerName) throws ApplicationException {
+		try {
+			Class object = Class.forName(className);
+			Constructor c = object.getConstructor(new Class[] { String.class });
+			return (AbstractPlayer) c.newInstance(new Object[] {playerName});
+
+		} catch (ClassNotFoundException e) {
+			throw new ApplicationException(e);
+		} catch (NoSuchMethodException e) {
+			throw new ApplicationException(e);
+		} catch (IllegalAccessException e) {
+			throw new ApplicationException(e);
+		} catch (InstantiationException e) {
+			throw new ApplicationException(e);
+		} catch (InvocationTargetException e) {
+			throw new ApplicationException(e);
+		}
+	}
 	
 	/**
 	 * Runs the game. Currently only 2 players are supported, but is could be
@@ -428,10 +450,12 @@ public class Game extends Thread {
 	private static void serializePlayers(List<AbstractPlayer> players) throws ApplicationException {
 		try {
 			for (AbstractPlayer player : players) {
-				ObjectOutputStream os = new ObjectOutputStream(
-						new FileOutputStream(player.getName()));
-				os.writeObject(player);
-				os.close();
+				if (player instanceof Serializable) {
+					ObjectOutputStream os = new ObjectOutputStream(
+							new FileOutputStream(player.getName()));
+					os.writeObject(player);
+					os.close();
+				}
 			}
 		} catch (IOException e) {
 			throw new ApplicationException(e);
@@ -439,18 +463,19 @@ public class Game extends Thread {
 	}
 	
 	/**
-	 * Deserializes a ReinforcementLearnerPlayer
+	 * Deserializes an AbstractPlayer
 	 * @param name
 	 * @return
 	 * @throws ApplicationException
 	 */
-	private static MLPlayer deserializePlayer(String name) throws ApplicationException {
+	private static AbstractPlayer deserializePlayer(String name) throws ApplicationException {
 		ObjectInput input = null;
 		try {
 	      InputStream file = new FileInputStream(name);
 	      InputStream buffer = new BufferedInputStream(file);
 	      input = new ObjectInputStream ( buffer );
-	      MLPlayer player = (MLPlayer) input.readObject();
+	      AbstractPlayer player = (AbstractPlayer) input.readObject();
+	      logger.info("Restored player: " + name);
 	      return player;
 		} catch(IOException e) {
 			throw new ApplicationException(e);

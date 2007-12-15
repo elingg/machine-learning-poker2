@@ -99,13 +99,21 @@ public class Util {
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				return null; // Two quads cannot be equal
+				else if (Hand1.get(1).getValue() > Hand2.get(1).getValue())
+					return hand1;
+				else if (Hand1.get(1).getValue() < Hand2.get(1).getValue())
+					return hand2;
+				return null;
 			} else if (hand1val == 600) {
 				if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				return null; // Two full-houses cannot be equal
+				else if (Hand1.get(1).getValue() > Hand2.get(1).getValue())
+					return hand1;
+				else if (Hand1.get(1).getValue() < Hand2.get(1).getValue())
+					return hand2;
+				return null;
 			} else if (hand1val == 500) {
 				for (int i = 4; i >= 0; i--) {
 					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
@@ -115,9 +123,9 @@ public class Util {
 				}
 				return null;
 			} else if (hand1val == 400) {
-				if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
+				if (Hand1.get(1).getValue() > Hand2.get(1).getValue()) // 1 used just to make sure A2345 straight doesnt mess up
 					return hand1;
-				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
+				else if (Hand1.get(1).getValue() < Hand2.get(1).getValue())
 					return hand2;
 				return null;
 			} else if (hand1val == 300) {
@@ -125,8 +133,15 @@ public class Util {
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())
 					return hand2;
-				return null; // two three of a kinds cannot be equal
-			} else if (hand1val == 200) {
+				for (int i = Hand1.size()-1; i >= 1; i--) {
+					if (Hand1.get(i).getValue() > Hand2.get(i).getValue())
+						return hand1;
+					else if (Hand1.get(i).getValue() < Hand2.get(i).getValue())
+						return hand2;
+				}
+				return null;
+			}
+			else if (hand1val == 200) {
 				if (Hand1.get(0).getValue() > Hand2.get(0).getValue())
 					return hand1;
 				else if (Hand1.get(0).getValue() < Hand2.get(0).getValue())

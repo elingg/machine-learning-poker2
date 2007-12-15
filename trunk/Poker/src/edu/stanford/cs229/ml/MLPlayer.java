@@ -188,7 +188,7 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		
 		optimumBet = ( ( (float) totalPot * (float) Bankroll * (float) Pwin ) / ( (float) totalPot + (float) Bankroll - (float) Pwin * (float) Bankroll ) );
 		
-		if(this.hand.getAllCards() == 6)
+		if(this.hand.getAllCards().size() == 6)
 			maxBet = (int) optimumBet / 5;
 		if(this.hand.getAllCards().size() == 7)
 			maxBet = (int) optimumBet / 6;

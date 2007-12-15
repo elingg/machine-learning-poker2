@@ -161,10 +161,10 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		// room for heuristic fn. to be calculated from analyzed data..
 		float T1 = (float)0.1;	// thresholds to be altered from learnt data
 		float T2 = (float)0.25;
-		float T3 = (float)0.55;
-		float T4 = (float)0.8;
-		float T5 = (float)0.93;
-		float T6 = (float)0.98;	// sure win
+		float T3 = (float)0.53;
+		float T4 = (float)0.77;
+		float T5 = (float)0.91;
+		float T6 = (float)0.97;	// sure win
 		float T7 = (float)1;
 		float Pwin;
 		float optimumBet;

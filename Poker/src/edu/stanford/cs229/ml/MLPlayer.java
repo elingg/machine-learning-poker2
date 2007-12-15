@@ -161,10 +161,11 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		// room for heuristic fn. to be calculated from analyzed data..
 		float T1 = (float)0.1;	// thresholds to be altered from learnt data
 		float T2 = (float)0.25;
-		float T3 = (float)0.5;
-		float T4 = (float)0.75;
+		float T3 = (float)0.55;
+		float T4 = (float)0.8;
 		float T5 = (float)0.93;
 		float T6 = (float)0.98;	// sure win
+		float T7 = (float)1;
 		float Pwin;
 		float optimumBet;
 		int maxBet = 0;
@@ -319,6 +320,7 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		}
 		
 		if(Pwin <=T5){
+			maxBet = (int) ((float) maxBet * 0.75);
 			if(opponentBet>= maxBet+50 && !isSlowPlay && isFold)
 				return new PlayerAction(ActionType.FOLD, 0);
 			if(!isSlowPlay || hand.getAllCards().size()==7){
@@ -343,10 +345,10 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 				return new PlayerAction(ActionType.FOLD, 0);
 			if(!isSlowPlay || hand.getAllCards().size()==7){
 				if(opponentBet <= maxBet+250){
-					if(maxBet*2>opponentBet){
+					if(maxBet>opponentBet){
 						if(isBluff)
-							return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(2*maxBet-(int)opponentBet, 2*maxBet));
-						else return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(2*maxBet-(int)opponentBet, 2*maxBet));
+							return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(maxBet-(int)opponentBet, maxBet));
+						else return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(maxBet-(int)opponentBet, maxBet));
 					}
 					else return new PlayerAction(ActionType.CHECK_OR_CALL,0);
 				}
@@ -356,7 +358,19 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 				return new PlayerAction(ActionType.FOLD, 0);
 			else return new PlayerAction(ActionType.CHECK_OR_CALL,0);
 		}
-		else{ // Pwin >T6
+		else if(Pwin < T7){ // Pwin >T6
+			if(!isSlowPlay || hand.getAllCards().size()==7){
+				if(maxBet*2>opponentBet){
+					if(isBluff)
+						return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(2*maxBet-(int)opponentBet, 2*maxBet));
+					else return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(2*maxBet-(int)opponentBet, 2*maxBet));
+				}
+				else return new PlayerAction(ActionType.CHECK_OR_CALL,0);
+			}
+			else return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(2*maxBet-(int)opponentBet, 2*maxBet));
+		}
+		else
+		{
 			if(!isSlowPlay || hand.getAllCards().size()==7){
 				if(maxBet*3>opponentBet){
 					if(isBluff)
@@ -367,6 +381,8 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 			}
 			else return new PlayerAction(ActionType.BET_OR_RAISE,Math.max(3*maxBet-(int)opponentBet, 3*maxBet));
 		}
+			
+			
 			
 	/*	
 		float FOLDING_THRESHOLD=(float).05;

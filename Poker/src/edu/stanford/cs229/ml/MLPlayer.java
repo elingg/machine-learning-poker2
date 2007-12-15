@@ -162,8 +162,8 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		float T1 = (float)0.1;	// thresholds to be altered from learnt data
 		float T2 = (float)0.25;
 		float T3 = (float)0.53;
-		float T4 = (float)0.77;
-		float T5 = (float)0.91;
+		float T4 = (float)0.75;
+		float T5 = (float)0.9;
 		float T6 = (float)0.97;	// sure win
 		float T7 = (float)1;
 		float Pwin;
@@ -190,11 +190,11 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		optimumBet = ( ( (float) totalPot * (float) Bankroll * (float) Pwin ) / ( (float) totalPot + (float) Bankroll - (float) Pwin * (float) Bankroll ) );
 		
 		if(this.hand.getAllCards().size() == 6)
-			maxBet = (int) optimumBet / 5;
+			maxBet = (int) optimumBet / 4;
 		if(this.hand.getAllCards().size() == 7)
-			maxBet = (int) optimumBet / 6;
-		else maxBet = (int) optimumBet / 4;
-		if(maxBet < 10)
+			maxBet = (int) optimumBet / 5;
+		else maxBet = (int) optimumBet / 3;
+		if(maxBet < 10 && maxBet!=0)
 			maxBet = 10;
 		else maxBet = maxBet - maxBet%10;
 		
@@ -321,6 +321,9 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		
 		if(Pwin <=T5){
 			maxBet = (int) ((float) maxBet * 0.75);
+			if(maxBet < 10 && maxBet!=0)
+				maxBet = 10;
+			else maxBet = maxBet - maxBet%10;
 			if(opponentBet>= maxBet+50 && !isSlowPlay && isFold)
 				return new PlayerAction(ActionType.FOLD, 0);
 			if(!isSlowPlay || hand.getAllCards().size()==7){

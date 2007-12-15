@@ -162,9 +162,9 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 		float T1 = (float)0.1;	// thresholds to be altered from learnt data
 		float T2 = (float)0.25;
 		float T3 = (float)0.5;
-		float T4 = (float)0.72;
-		float T5 = (float)0.89;
-		float T6 = (float)0.96;	// sure win
+		float T4 = (float)0.75;
+		float T5 = (float)0.93;
+		float T6 = (float)0.98;	// sure win
 		float Pwin;
 		float optimumBet;
 		int maxBet = 0;
@@ -187,7 +187,12 @@ public class MLPlayer extends AbstractPlayer implements Serializable {
 			Bankroll = 1000;
 		
 		optimumBet = ( ( (float) totalPot * (float) Bankroll * (float) Pwin ) / ( (float) totalPot + (float) Bankroll - (float) Pwin * (float) Bankroll ) );
-		maxBet = (int) optimumBet / 4;
+		
+		if(this.hand.getAllCards() == 6)
+			maxBet = (int) optimumBet / 5;
+		if(this.hand.getAllCards().size() == 7)
+			maxBet = (int) optimumBet / 6;
+		else maxBet = (int) optimumBet / 4;
 		if(maxBet < 10)
 			maxBet = 10;
 		else maxBet = maxBet - maxBet%10;

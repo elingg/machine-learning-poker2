@@ -158,6 +158,16 @@ public class Hand implements Serializable {
 						return tempList;
 					}
 				}
+				if(suitList.get(0).getValue()==2 && suitList.get(1).getValue()==3 && suitList.get(2).getValue()==4 && suitList.get(3).getValue()==5 && suitList.get(suitList.size()-1).getValue()==14)
+				{
+					tempList.add(suitList.get(0));
+					tempList.add(suitList.get(1));
+					tempList.add(suitList.get(2));
+					tempList.add(suitList.get(3));
+					tempList.add(suitList.get(suitList.size()-1));
+					// Eg. (4,5,6,7,8) returned
+					return tempList;
+				}
 				return null;
 			}
 		}
@@ -198,6 +208,7 @@ public class Hand implements Serializable {
 		
 		for(int i=tempCards.size()-1; i>=4; i--)
 		{
+			
 			if(((tempCards.get(i)).getValue() - 1 == (tempCards.get(i-1)).getValue()) && ((tempCards.get(i-1)).getValue() - 1 == (tempCards.get(i-2)).getValue()) && ((tempCards.get(i-2)).getValue() - 1 == (tempCards.get(i-3)).getValue()) && ((tempCards.get(i-3)).getValue() - 1 == (tempCards.get(i-4)).getValue()))
 			{
 				tempList.add(tempCards.get(i-4));
@@ -209,6 +220,16 @@ public class Hand implements Serializable {
 				return tempList;
 			}
 				
+		}
+		if(tempCards.size()>=5 && tempCards.get(0).getValue()==2 && tempCards.get(1).getValue()==3 && tempCards.get(2).getValue()==4 && tempCards.get(3).getValue()==5 && tempCards.get(tempCards.size()-1).getValue()==14)
+		{
+			tempList.add(tempCards.get(0));
+			tempList.add(tempCards.get(1));
+			tempList.add(tempCards.get(2));
+			tempList.add(tempCards.get(3));
+			tempList.add(tempCards.get(tempCards.size()-1));
+			// Eg. (4,5,6,7,8) returned
+			return tempList;
 		}
 		
 		return null;

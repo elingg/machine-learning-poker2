@@ -1,4 +1,5 @@
 package edu.stanford.cs229;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,8 +15,6 @@ public class Util {
 	static final int pair=100;
 	static final int highcard = 0;
 	
-	
-	
 	/**
 	 * Private constructor ensures that this is never instantiated
 	 *
@@ -24,7 +23,6 @@ public class Util {
 
 	public static int findHighCardValue(List<Card> cardList)
 	{		
-		//TODO: Elizabeth, is it okay if I add a size check here?
 		if(cardList!=null && cardList.size() > 0)
 		{
 			Collections.sort(cardList);
@@ -239,7 +237,7 @@ public class Util {
 		//System.out.println(totalHands);
 		return ( 1 - ( (float) betterHands/ (float) totalHands ) );
 	}
-	
+
 	public static float computeOuts(Hand hand)
 	{
 		Deck tempDeck1= new Deck();
@@ -272,8 +270,8 @@ public class Util {
 				card2=tempDeck2.drawCard();
 				if(tableCards.contains(card2) || myCards.contains(card2) || card1.equals(card2))
 					continue;
-				
-				tempDeck3.shuffleDeck();
+			
+				/*tempDeck3.shuffleDeck();
 				if(hand.getTableCards().size() ==3)
 				{
 
@@ -355,8 +353,8 @@ public class Util {
 						
 						
 					}
-				}
-				else
+				}*/
+				//else
 				{
 					myHand= new Hand();
 					opponentsHand= new Hand();
@@ -380,8 +378,6 @@ public class Util {
 				
 			}
 		}
-		
-		
 		return (float)numLosses/(float)numRounds;
 	}
 }

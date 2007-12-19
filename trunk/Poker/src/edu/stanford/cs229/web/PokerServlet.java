@@ -37,7 +37,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	public static String LOG_DIR = "/tmp/poker/"; 
 	//public static String LOG_DIR = "c:/";
 	
-	private static String DEFAULT_BOT_CLASS = "MLPlayer";
+	private static String DEFAULT_BOT_CLASS = "ReinforcementLearningPlayer";
 	private static String DEFAULT_BOT_PACKAGE = "edu.stanford.cs229.ml";
 	
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
@@ -91,11 +91,11 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 					botClassName = DEFAULT_BOT_CLASS;  //default is MLPlayer
 				}
 				
-				//Get whether to deserialize the bot from disk
-				boolean deserializeBot = false;
+				//Get whether to deserialize the bot from disk.  By default, deserialize
+				boolean deserializeBot = true;
 				String deserializeBotParameter = request.getParameter(Constants.DESERIALIZE_BOT_PARAMETER);
-				if(deserializeBotParameter != null && deserializeBotParameter.equals("1")) {
-					deserializeBot = true;
+				if(deserializeBotParameter != null && deserializeBotParameter.equals("0")) {
+					deserializeBot = false;
 				}
 				
 				Object isFacebook = request.getAttribute(Constants.IS_FACEBOOK);
@@ -181,7 +181,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		if (deserializeBot) {
 			//Deserialize the bot from disk
 			player1 = getComputerPlayer(botClassName);
-			player1.setName(botClassName);
+			player1.setName(Constants.WEBAPP_OPPONENT_NAME);
 
 		} else {
 			//Instantiate a new class dynamically

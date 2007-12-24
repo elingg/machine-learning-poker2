@@ -1,7 +1,7 @@
 package edu.stanford.cs229;
 
 /**
- * This is a utility method.  This should be merged into Util.java eventually.
+ * This is a utility method for putting messages to HTML.
  * @author ago
  *
  */
@@ -35,5 +35,14 @@ public class UtilMessage {
 		default:
 			return "";
 		}
+	}
+	
+	
+	public static String printDealerIfNecessary(GameState gameState, AbstractPlayer p) {
+		if(gameState.isBigBlind(p)) {
+			return "";
+		} else {
+			return " (Dealer)";
+		}		
 	}
 }

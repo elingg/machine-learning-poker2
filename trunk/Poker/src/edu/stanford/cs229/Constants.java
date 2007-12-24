@@ -2,7 +2,8 @@ package edu.stanford.cs229;
 
 public class Constants {
 	//The following are used for the web application
-	public static String GAME_ATTRIBUTE = "game";
+
+	//Parameters that appear in URL
 	public static String NAME_PARAMETER = "name";
 	public static String ID_PARAMETER = "id";
 	public static String ACTION_TYPE_PARAMETER = "actionType";
@@ -10,15 +11,21 @@ public class Constants {
 	public static String PLAY_AGAIN_PARAMETER = "playAgain";
 	public static String END_OF_GAME_PARAMETER = "isEndOfGame";
 	public static String BOT_PARAMETER = "bot";
-	public static String WEB_PLAYER = "webPlayer";
-	public static String TIMESTAMP = "timestamp";
+	public static String VERSION_PARAMETER = "version";
+	public static String DESERIALIZE_BOT_PARAMETER = "deserialize";
+	
+	//Attributes stored in session
+	public static String GAME_ATTRIBUTE = "game";
+	public static String IS_FACEBOOK_ATTRIBUTE = "isFacebook";
+	public static String TIMESTAMP_ATTRIBUTE = "timestamp";
+	public static String WEB_PLAYER_ATTRIBUTE = "webPlayer";
+	
+	//HTML Label
 	public static String CHECK_LABEL = "Check";
 	public static String CALL_LABEL = "Call";
 	public static String BET_RAISE_LABEL = "Bet/Raise";
 	public static String FOLD_LABEL = "Fold";
-	public static String IS_FACEBOOK = "isFacebook";
-	public static String TRUE = "true";
-	public static String FALSE = "false";
-	public static String DESERIALIZE_BOT_PARAMETER = "deserialize";
+	
+	//Misc
 	public static String WEBAPP_OPPONENT_NAME = "Computer";
 }

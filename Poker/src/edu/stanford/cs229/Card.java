@@ -101,7 +101,7 @@ public class Card implements Comparable, Serializable {
 		String s = "";
 		for(int i = 0; i < 2; i++) {
 		  s += "<img src=\"http://www.csse.monash.edu.au/~stevenm/texasholdem/images/back07_small.png\"/>";
-		}
+		}		
 		return s;
 	}
 	

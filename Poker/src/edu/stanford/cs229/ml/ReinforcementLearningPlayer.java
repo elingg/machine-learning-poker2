@@ -210,6 +210,12 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 			betCountMaxForEachGame++;
 			if(handVal>=600)
 				return new PlayerAction(ActionType.BET_OR_RAISE,60);
+			else if(fuzzy >.75)
+				return new PlayerAction(ActionType.BET_OR_RAISE,20);
+			else if(fuzzy> .55)
+				return new PlayerAction(ActionType.BET_OR_RAISE,60);
+			else if(fuzzy > .45)
+				return new PlayerAction(ActionType.BET_OR_RAISE, 10);
 			else
 				return new PlayerAction(ActionType.BET_OR_RAISE,40);
 		}

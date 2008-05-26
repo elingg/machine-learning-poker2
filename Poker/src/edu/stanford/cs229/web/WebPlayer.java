@@ -19,7 +19,7 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.WebPlayer");
 	
 	int SLEEP_DELAY = 500; //in ms
-	int MAX_ATTEMPTS = 1000;
+	int MAX_ATTEMPTS = 3600; //500ms * 3600 = 30 minutes
 	
 	// Signal (web app -> game engine) to let the game engine know the player
 	// wants to play again
@@ -108,6 +108,4 @@ public class WebPlayer extends AbstractPlayer implements Serializable {
 	public void setPlayAgainSignal(String decisionToContinue) {
 		this.playAgainSignal = decisionToContinue;
 	}
-	
-
 }

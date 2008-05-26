@@ -1,6 +1,7 @@
 package edu.stanford.cs229.web;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
@@ -24,18 +25,23 @@ import edu.stanford.cs229.Constants;
 import edu.stanford.cs229.Game;
 import edu.stanford.cs229.LogFormatter;
 import edu.stanford.cs229.PlayerAction;
-import edu.stanford.cs229.RandomPlayer;
 import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
- public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
+public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
 	/**
 	 * Deployment steps:
-	 * 1. Change log dir here
-	 * 2. Make sure max games in Game.java is high
+	 * 1. Make sure max games in Game.java is high
 	 */
-	public static String LOG_DIR = "/tmp/poker/"; 
-	//public static String LOG_DIR = "c:/";
+	public static String LOG_DIR;
+	
+	static {
+		if(File.separator.equals("/")) {
+			LOG_DIR = "/usr/local/poker/";
+		} else {
+			LOG_DIR = "C:/poker/logs";
+		}
+	}
 	
 	private static String DEFAULT_BOT_CLASS = "ReinforcementLearningPlayer";
 	private static String DEFAULT_BOT_PACKAGE = "edu.stanford.cs229.ml";
@@ -52,14 +58,14 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 	}
 	
 	/**
-	 * GET Web interface
+	 * Processes GET request
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		process(request, response);
 	}
 	
 	/**
-	 * Post Web interface
+	 * Processes POST request
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		process(request, response);
@@ -98,7 +104,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 					deserializeBot = false;
 				}
 				
-				Object isFacebook = request.getAttribute(Constants.IS_FACEBOOK);
+				Object isFacebook = request.getAttribute(Constants.IS_FACEBOOK_ATTRIBUTE);
 				if(isFacebook == null) {
 					//Non-Facebook
 					System.out.println("Non Facebook");
@@ -119,7 +125,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 				}
 			} 
 			
-			WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER);
+			WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER_ATTRIBUTE);
 			
 			//Process the player actions
 			String actionStr = request.getParameter(Constants.ACTION_TYPE_PARAMETER);
@@ -134,8 +140,9 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 				
 			}
 			
+			//TODO: Push this down to Game.java
 			if(actionStr != null && !actionStr.equals("")) {
-				Long responseTime = System.currentTimeMillis() - (Long) session.getAttribute(Constants.TIMESTAMP);
+				Long responseTime = System.currentTimeMillis() - (Long) session.getAttribute(Constants.TIMESTAMP_ATTRIBUTE);
 				processPlayerAction(player, actionStr, bet, responseTime);
 			}
 			
@@ -153,8 +160,13 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 					break;
 				}
 			}
-			session.setAttribute(Constants.TIMESTAMP, new Long(System.currentTimeMillis()));
-			request.getRequestDispatcher("WEB-INF/game.jsp").forward(request, response);
+			session.setAttribute(Constants.TIMESTAMP_ATTRIBUTE, new Long(System.currentTimeMillis()));
+			
+			if(request.getParameter(Constants.VERSION_PARAMETER) != null && request.getParameter(Constants.VERSION_PARAMETER).equals("1")) {
+				request.getRequestDispatcher("WEB-INF/game1.jsp").forward(request, response);
+			} else {
+				request.getRequestDispatcher("WEB-INF/game.jsp").forward(request, response);
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -201,7 +213,7 @@ import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 		Game game = new Game(players);
 		game.start();
 		session.setAttribute(Constants.GAME_ATTRIBUTE, game);
-		session.setAttribute(Constants.WEB_PLAYER, player2);
+		session.setAttribute(Constants.WEB_PLAYER_ATTRIBUTE, player2);
 	}
 	
 	/**

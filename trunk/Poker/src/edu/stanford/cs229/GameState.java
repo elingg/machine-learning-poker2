@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 /**
  * Represents the state of a game.  I'm not sure if I have the right abstraction here.
- * @author ago
+ * @author alecmgo@gmail.com
  *
  */
 public class GameState {
@@ -20,8 +20,8 @@ public class GameState {
 	 *
 	 */
 	public GameState(List<AbstractPlayer> players) {
-		playerActivityRecords = new ArrayList<PlayerActivityRecord>();
 		this.players = players;
+		playerActivityRecords = new ArrayList<PlayerActivityRecord>();
 	}
 	
 	/**
@@ -144,7 +144,7 @@ public class GameState {
 	
 	/**
 	 * Compares the pots of Player 1 and Player 2
-	 * @return
+	 * @return true if the pots are equal, otherwise false
 	 */
 	public boolean arePotsEqual() {
 		if(players.get(0).getPot() != players.get(1).getPot()) {
@@ -153,6 +153,5 @@ public class GameState {
 			return true;
 		}		
 	}
-	
 	
 }

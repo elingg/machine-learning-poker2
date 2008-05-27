@@ -1,16 +1,14 @@
 package edu.stanford.cs229.web;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -23,49 +21,33 @@ import edu.stanford.cs229.ActionType;
 import edu.stanford.cs229.ApplicationException;
 import edu.stanford.cs229.Constants;
 import edu.stanford.cs229.Game;
-import edu.stanford.cs229.LogFormatter;
 import edu.stanford.cs229.PlayerAction;
 import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
 
 public class PokerServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 
-	/**
-	 * Deployment steps:
-	 * 1. Make sure max games in Game.java is high
-	 */
-	public static String LOG_DIR;
-	
-	static {
-		if(File.separator.equals("/")) {
-			LOG_DIR = "/usr/local/poker/";
-		} else {
-			LOG_DIR = "C:/poker/logs";
-		}
-	}
+	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
 	
 	private static String DEFAULT_BOT_CLASS = "ReinforcementLearningPlayer";
 	private static String DEFAULT_BOT_PACKAGE = "edu.stanford.cs229.ml";
 	
-	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.PokerServlet");
-	private static boolean loggersSetup = false;
+	//Get whether to deserialize the bot from disk.
+	private static boolean DESERIALIZE_BOT = true;
 	
+	public static final int MAX_BET = 1000;
+	
+	private List<Game> activeGames = new ArrayList<Game>();
+	private static final long GAME_TIMEOUT = 1000 * 60 * 30; //30 minutes
+
 	/**
 	 * Constructor
 	 */
 	public PokerServlet() {
 		super();
-		setupLogger();
 	}
 	
 	/**
-	 * Processes GET request
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		process(request, response);
-	}
-	
-	/**
-	 * Processes POST request
+	 * Processes POST request.  This web application does not accept GET requests.
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		process(request, response);
@@ -91,84 +73,51 @@ public class PokerServlet extends javax.servlet.http.HttpServlet implements java
 			//Set up a new game, if there is no Game object in the seesion
 			if (session.getAttribute(Constants.GAME_ATTRIBUTE) == null) {
 				
-				//Get the Java Class of the bot
-				String botClassName = request.getParameter(Constants.BOT_PARAMETER);
-				if(botClassName == null || botClassName.equals("")) {
-					botClassName = DEFAULT_BOT_CLASS;  //default is MLPlayer
-				}
-				
-				//Get whether to deserialize the bot from disk.  By default, deserialize
-				boolean deserializeBot = true;
-				String deserializeBotParameter = request.getParameter(Constants.DESERIALIZE_BOT_PARAMETER);
-				if(deserializeBotParameter != null && deserializeBotParameter.equals("0")) {
-					deserializeBot = false;
-				}
-				
 				Object isFacebook = request.getAttribute(Constants.IS_FACEBOOK_ATTRIBUTE);
 				if(isFacebook == null) {
 					//Non-Facebook
-					System.out.println("Non Facebook");
+
 					String name = request.getParameter(Constants.NAME_PARAMETER);
-					String id = name + request.getRemoteAddr() + botClassName;
-					processNewGame(id, name, botClassName, deserializeBot, session);
+					String id = name + request.getRemoteAddr() + DEFAULT_BOT_CLASS;
+					
+					logger.info("Starting non-Facebook Game");
+					processNewGame(id, name, DEFAULT_BOT_CLASS, DESERIALIZE_BOT, session);
 				} else {
-					System.out.println("Facebook");
-					
 					//Facebook
+					
 					String name = (String) request.getAttribute(Constants.NAME_PARAMETER);
-					String id = ((Integer) request.getAttribute(Constants.ID_PARAMETER)).toString() + botClassName;
-					
-					System.out.println("Name: " + name);
-					System.out.println("ID: " + id);
-					
-					processNewGame(id, name, botClassName, deserializeBot, session);
+					String id = ((Integer) request.getAttribute(Constants.ID_PARAMETER)).toString() + DEFAULT_BOT_CLASS;
+
+					logger.info("Starting Facebook Game.  Name: [" + name + "] ID: [" + id + "]");
+					processNewGame(id, name, DEFAULT_BOT_CLASS, DESERIALIZE_BOT, session);
 				}
 			} 
 			
 			WebPlayer player = (WebPlayer) session.getAttribute(Constants.WEB_PLAYER_ATTRIBUTE);
-			
+
 			//Process the player actions
 			String actionStr = request.getParameter(Constants.ACTION_TYPE_PARAMETER);
 			String bet = request.getParameter(Constants.BET_PARAMETER);
-			
-			//If the human player tries to bet more than 1000, reset it to 1000
-			try {
-				if(Integer.parseInt(bet) > 1000) {
-					bet = "1000";
-				}
-			} catch(NumberFormatException e) {
-				
-			}
 			
 			//TODO: Push this down to Game.java
 			if(actionStr != null && !actionStr.equals("")) {
 				Long responseTime = System.currentTimeMillis() - (Long) session.getAttribute(Constants.TIMESTAMP_ATTRIBUTE);
 				processPlayerAction(player, actionStr, bet, responseTime);
 			}
-			
+
 			//Process "play again" signal that happens at the end of a game
 			String playAgain = request.getParameter(Constants.PLAY_AGAIN_PARAMETER);
 			if(playAgain != null && !playAgain.equals("")) {
-				player.setPlayAgainSignal(playAgain);
+				player.getPlayAgainQueue().add(Boolean.TRUE);
 			}
-				
-			//Wait until the game is ready for the player's next action
-			while (true) {
-				logger.finest("Waiting");
-				Thread.sleep(1000);  //this value needs to be 2x higher than the WebPlayer threshold.
-				if (player.isTurn()) {
-					break;
-				}
-			}
-			session.setAttribute(Constants.TIMESTAMP_ATTRIBUTE, new Long(System.currentTimeMillis()));
 			
-			if(request.getParameter(Constants.VERSION_PARAMETER) != null && request.getParameter(Constants.VERSION_PARAMETER).equals("1")) {
-				request.getRequestDispatcher("WEB-INF/game1.jsp").forward(request, response);
-			} else {
-				request.getRequestDispatcher("WEB-INF/game.jsp").forward(request, response);
-			}
+			player.getServletQueue().take();	
+			
+			session.setAttribute(Constants.TIMESTAMP_ATTRIBUTE, new Long(System.currentTimeMillis()));
+			request.getRequestDispatcher("WEB-INF/game.jsp").forward(request, response);
+			
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			throw new ServletException(e);
 		}
 	}
 	
@@ -206,14 +155,33 @@ public class PokerServlet extends javax.servlet.http.HttpServlet implements java
 		}
 		player1.setId("Computer-" + playerId);
 		players.add(player1);
-		
-		WebPlayer player2 = new WebPlayer(playerName, playerId);
+		BlockingQueue<PlayerAction> playerActionQueue = new LinkedBlockingQueue<PlayerAction>();
+		BlockingQueue<Boolean> playAgainQueue = new LinkedBlockingQueue<Boolean>();
+		BlockingQueue<Integer> servletQueue = new LinkedBlockingQueue<Integer>();
+		WebPlayer player2 = new WebPlayer(playerName, playerId, playerActionQueue, playAgainQueue, servletQueue);
 		players.add(player2);
 		
 		Game game = new Game(players);
 		game.start();
+		
+		activeGames.add(game);
+		clearOldGames();
+	
 		session.setAttribute(Constants.GAME_ATTRIBUTE, game);
 		session.setAttribute(Constants.WEB_PLAYER_ATTRIBUTE, player2);
+	}	
+	
+	/**
+	 * Clears old games.
+	 *
+	 */
+	private void clearOldGames() {
+		logger.fine("Clearing old games");
+		for(Game game : activeGames) {
+			if(System.currentTimeMillis() - game.getLastActivityTime() > GAME_TIMEOUT) {
+				game.interrupt();
+			}
+		}
 	}
 	
 	/**
@@ -224,12 +192,17 @@ public class PokerServlet extends javax.servlet.http.HttpServlet implements java
 	 * @param responseTime
 	 */
 	public void processPlayerAction(WebPlayer player, String actionStr, String bet, Long responseTime) {
+		BlockingQueue<PlayerAction> queue = player.getWebplayerQueue();
 		if(actionStr.equals(Constants.FOLD_LABEL)) {
-			player.setCurrentAction(new PlayerAction(ActionType.FOLD, 0, responseTime));
+			queue.add(new PlayerAction(ActionType.FOLD, 0, responseTime));
 		} else if(actionStr.equals(Constants.CHECK_LABEL) || actionStr.equals(Constants.CALL_LABEL)) {
-			player.setCurrentAction(new PlayerAction(ActionType.CHECK_OR_CALL, 0, responseTime));
+			queue.add(new PlayerAction(ActionType.CHECK_OR_CALL, 0, responseTime));
 		} else if(actionStr.equals(Constants.BET_RAISE_LABEL)) {
-			player.setCurrentAction(new PlayerAction(ActionType.BET_OR_RAISE, Integer.parseInt(bet), responseTime));
+			//If the human player tries to bet more than 1000, reset it to 1000
+			if(Integer.parseInt(bet) > MAX_BET) {
+				bet = Integer.toString(MAX_BET);
+			}
+			queue.add(new PlayerAction(ActionType.BET_OR_RAISE, Integer.parseInt(bet), responseTime));
 		} else {
 			throw new IllegalArgumentException("No valid player action");
 		}
@@ -249,39 +222,5 @@ public class PokerServlet extends javax.servlet.http.HttpServlet implements java
 		} catch(IOException e) {
 			throw new ServletException(e);
 		}
-	}
-	
-	/**
-	 * Hack to get loggers set up.
-	 * TODO: Find out a better way to do logging
-	 */
-	private void setupLogger() {
-		if (!loggersSetup) {
-			// Create a console handler
-			ConsoleHandler handler = new ConsoleHandler();
-			handler.setLevel(Level.FINEST);
-			
-			// Add to logger
-			Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
-			logger.addHandler(handler);
-			logger.setLevel(Level.FINEST);
-			
-			
-			//Setup file handler logger
-	        // Create an appending file handler
-			try {
-				boolean append = true;
-				FileHandler fileHandler = new FileHandler(LOG_DIR + "PlayerActivityRecord.log", append);
-				fileHandler.setFormatter(new LogFormatter());
-				fileHandler.setLevel(Level.FINEST);
-				//Add to the desired logger
-				Logger fileLogger = Logger.getLogger("file.PlayerActivityRecord");
-				fileLogger.addHandler(fileHandler);
-				fileLogger.setLevel(Level.FINEST);
-			} catch(IOException e) {
-				throw new RuntimeException("Could not set up logger");
-			}
-		}
-		loggersSetup = true;
 	}
 }

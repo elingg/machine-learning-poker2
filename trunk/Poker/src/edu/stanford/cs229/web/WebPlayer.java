@@ -1,6 +1,7 @@
 package edu.stanford.cs229.web;
 
 import java.io.Serializable;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
 import edu.stanford.cs229.AbstractPlayer;
@@ -18,94 +19,57 @@ import edu.stanford.cs229.PlayerAction;
 public class WebPlayer extends AbstractPlayer implements Serializable {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.web.WebPlayer");
 	
-	int SLEEP_DELAY = 500; //in ms
-	int MAX_ATTEMPTS = 3600; //500ms * 3600 = 30 minutes
+	private final BlockingQueue<PlayerAction> playerActionQueue;
+	private final BlockingQueue<Boolean> playAgainQueue;
+	private final BlockingQueue<Integer> servletQueue;
 	
-	// Signal (web app -> game engine) to let the game engine know the player
-	// wants to play again
-	private String playAgainSignal = null;
-
-	// Signal (web app -> game engine) to let the Game thread know about the
-	// player's decision
-	private PlayerAction currentAction = null;
-
-	// Signal (game engine -> web app) to let the Servlet know that it should
-	// show the page to the user
-	private boolean isTurnSignal;  
-	
-	public WebPlayer(String name) {
-		super(name);
+	public WebPlayer(String name, String id, BlockingQueue<PlayerAction> webplayerQueue, BlockingQueue<Boolean> playAgainQueue, BlockingQueue<Integer> servletQueue) {
+		super(name, id);
+		this.playerActionQueue = webplayerQueue;
+		this.playAgainQueue = playAgainQueue;
+		this.servletQueue = servletQueue;
 	}
 	
-	public WebPlayer(String name, String id) {
-		super(name, id);		
+	public BlockingQueue<Boolean> getPlayAgainQueue() {
+		return playAgainQueue;
+	}
+
+	public BlockingQueue<PlayerAction> getWebplayerQueue() {
+		return playerActionQueue;
+	}
+
+	public BlockingQueue<Integer> getServletQueue() {
+		return servletQueue;
 	}
 	
 	/**
 	 * PubSub model
 	 */
 	public PlayerAction getAction(GameState state) throws ApplicationException {
-		this.isTurnSignal = true;
-
 		try {
-			int count = 0;
-			while(currentAction == null && count < MAX_ATTEMPTS) {
-				count++;
-				//logger.finest("Did not find action for " + name);
-				Thread.sleep(SLEEP_DELAY);
-				logger.finest("Waiting");
-			}
+			servletQueue.put(new Integer(1));
+			return playerActionQueue.take();
 		} catch(InterruptedException e) {
 			e.printStackTrace();
+			throw new ApplicationException("Thread has ended");
 		}
-
-		//TODO: Use a more elegant way to copy an object
-		PlayerAction action = new PlayerAction(currentAction.getActionType(), currentAction.getBet(), currentAction.getResponseTime()); 
-		this.currentAction = null;
-		this.isTurnSignal = false;
-		return action;
 	}
 
-	public void setCurrentAction(PlayerAction currentAction) {
-		this.currentAction = currentAction;
-	}
-
-	public boolean isTurn() {
-		return isTurnSignal;
-	}
-
-	public void setTurn(boolean isTurn) {
-		this.isTurnSignal = isTurn;
-	}
-	
 	/**
-	 * Waits for the "decision" signal to continue
+	 * TODO: Fix this.
 	 */
 	public boolean isDonePlaying() {
-		isTurnSignal = true;  //Signal to servlet that it can continue
-		
-		int count = 0;
 		try {
-			while (playAgainSignal == null && count < MAX_ATTEMPTS) {
-				count++;
-				Thread.sleep(SLEEP_DELAY);
-				logger.finest("Waiting");
-			}
-			playAgainSignal = null;
-			isTurnSignal = false;
+			servletQueue.put(new Integer(1));
+			playAgainQueue.take();
 			return false;
-		} catch (InterruptedException e) {
+		} catch(InterruptedException e) {
 			e.printStackTrace();
+			//TODO: Fix this.  I'm not sure what's supposed to happen here.
 			return false;
-		}		
+		}
+		
 	}
 
 	
-	public String getPlayAgainSignal() {
-		return playAgainSignal;
-	}
-
-	public void setPlayAgainSignal(String decisionToContinue) {
-		this.playAgainSignal = decisionToContinue;
-	}
 }

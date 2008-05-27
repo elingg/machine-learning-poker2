@@ -10,9 +10,8 @@ public class Constants {
 	public static String BET_PARAMETER = "bet";
 	public static String PLAY_AGAIN_PARAMETER = "playAgain";
 	public static String END_OF_GAME_PARAMETER = "isEndOfGame";
-	public static String BOT_PARAMETER = "bot";
 	public static String VERSION_PARAMETER = "version";
-	public static String DESERIALIZE_BOT_PARAMETER = "deserialize";
+
 	
 	//Attributes stored in session
 	public static String GAME_ATTRIBUTE = "game";

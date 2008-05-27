@@ -104,9 +104,8 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 	 * Finalizes all talbe updates after a game ends.  Also, clears the hand for the next round.
 	 * TODO: Rename
 	 */
-	public void processEndOfGame(int resultState)
+	public void processEndOfRound(int resultState)
 	{
-		logger.finest("Am I called? hand");
 		Fraction initialVal= (Fraction)initialState.get(initialKey);
 		Fraction fiveCardVal=(Fraction)fiveCardState.get(fiveCardKey);
 		Fraction sixCardVal=(Fraction)sixCardState.get(sixCardKey);
@@ -129,7 +128,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		numGames++;
 		betCountMaxForEachGame = 0;
 		logger.finest("Before Clearing hand");
-		super.processEndOfGame(resultState);
+		super.processEndOfRound(resultState);
 			
 	}
 	

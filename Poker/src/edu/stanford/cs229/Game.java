@@ -1,60 +1,32 @@
 package edu.stanford.cs229;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import edu.stanford.cs229.ml.MLPlayer;
-import edu.stanford.cs229.ml.ReinforcementLearningPlayer;
-
 /**
- * Represents a Texas Hold'em Game. This is currently only for 2 player. In the
+ * Represents a Texas Holdem Game. This is currently only for 2 player. In the
  * future, it may be extended to more players (if we have time).
  * 
- * @author ago
+ * @author alecmgo@gmail.com
  * 
  */
 public class Game extends Thread {
 	private static Logger logger = Logger.getLogger("edu.stanford.cs229.Game");
 	
-	/* START OF CONFIGURATION SETTINGS */
-	//private final static String classPlayer1 = "edu.stanford.cs229.HumanPlayer";
-	private final static String classPlayer1 = "edu.stanford.cs229.ml.ReinforcementLearningPlayer";
-	private final static String classPlayer2 = "edu.stanford.cs229.ml.ReinforcementLearningPlayer";
-	
-	//Names of the players
-	private final static String namePlayer1 = "Player1";
-	private final static String namePlayer2 = "Player2";
-	
-	//Load the player from disk?
-	private final static boolean RESTORE_PLAYERS = false;  
-	
-	//Maximum number of games to be played
-	private final static int MAX_RUNS = 100000;
-	
-	private final static int BLIND_AMOUNT = 5; 
-	
-	/* END OF CONFIGURATION SETTINGS */
+	private final int BLIND_AMOUNT = 5; 
 	
 	private int numRuns = 0;  //number of games played
-
+	private final int maxRuns;  //maximum number of runs
+	
 	private List<AbstractPlayer> players;
 
 	private GameState gameState;
 
 	private final Deck deck;
-
+	
+	private long lastActivityTime = System.currentTimeMillis(); 
 	/**
 	 * Initializes a game
 	 * @param players
@@ -62,6 +34,18 @@ public class Game extends Thread {
 	public Game(List<AbstractPlayer> players) {
 		this.players = players;
 		this.deck = new Deck();
+		this.maxRuns = Integer.MAX_VALUE;
+	}
+	
+	/**
+	 * Initializes a game.  
+	 * @param players
+	 * @param maxRuns Maximum number of runs.  This is used when training the bot.
+	 */
+	public Game(List<AbstractPlayer> players, int maxRuns) {
+		this.players = players;
+		this.deck = new Deck();
+		this.maxRuns = maxRuns;
 	}
 	
 	/**
@@ -72,55 +56,8 @@ public class Game extends Thread {
 	 */
 	Game(List<AbstractPlayer> players, Deck fakeDeck) {
 		this.players = players;
-		this.deck = fakeDeck;		
-	}
-	
-	/**
-	 * Main entry-point into the game, if running through the command-line
-	 * @param args
-	 * @throws ApplicationException
-	 */
-	public static void main(String[] args) throws ApplicationException {
-		// Set up the logging config
-		// TODO: Fix the following.
-		System.setProperty("java.util.logging.config.file",
-				"logging.properties");
-
-		List<AbstractPlayer> players = new ArrayList<AbstractPlayer>();
-
-		if (RESTORE_PLAYERS) {
-			AbstractPlayer player1 = deserializePlayer(namePlayer1);
-			AbstractPlayer player2 = deserializePlayer(namePlayer2);
-			players.add(player1);
-			players.add(player2);
-		} else {
-			players.add(generatePlayer(classPlayer1, namePlayer1));
-			players.add(generatePlayer(classPlayer2, namePlayer2));
-		}
-
-		Game game = new Game(players);
-		game.run();
-
-	}
-
-	public static AbstractPlayer generatePlayer(String className,
-			String playerName) throws ApplicationException {
-		try {
-			Class object = Class.forName(className);
-			Constructor c = object.getConstructor(new Class[] { String.class });
-			return (AbstractPlayer) c.newInstance(new Object[] {playerName});
-
-		} catch (ClassNotFoundException e) {
-			throw new ApplicationException(e);
-		} catch (NoSuchMethodException e) {
-			throw new ApplicationException(e);
-		} catch (IllegalAccessException e) {
-			throw new ApplicationException(e);
-		} catch (InstantiationException e) {
-			throw new ApplicationException(e);
-		} catch (InvocationTargetException e) {
-			throw new ApplicationException(e);
-		}
+		this.deck = fakeDeck;
+		this.maxRuns = Integer.MAX_VALUE;
 	}
 	
 	/**
@@ -136,6 +73,7 @@ public class Game extends Thread {
 			
 			while (true) {
 				numRuns++;
+				System.out.println(numRuns);
 				
 				//Alternate which player goes first
 				if(numRuns % 2 == 0) {
@@ -145,12 +83,12 @@ public class Game extends Thread {
 				}
 				
 				// Check with each player if they are done or not. This is
-				// important for humann players.
+				// important for human players.
 				boolean player1Done = player1.isDonePlaying();
 				boolean player2Done = player2.isDonePlaying();
 				
 				//Decide whether to continue or not.
-				if ((numRuns > MAX_RUNS) || player1Done || player2Done) {
+				if ((numRuns > maxRuns) || player1Done || player2Done) {
 					break;
 				}				
 			}
@@ -162,7 +100,7 @@ public class Game extends Thread {
 				player.debugResults();
 			}
 
-			serializePlayers(players);
+			
 		} catch (ApplicationException e) {
 			e.printStackTrace();
 		}
@@ -175,6 +113,8 @@ public class Game extends Thread {
 	 * @throws ApplicationException
 	 */
 	private void runGameRound(AbstractPlayer player1, AbstractPlayer player2) throws ApplicationException {
+		lastActivityTime = System.currentTimeMillis();
+		
 		resetPlayerBankrollIfNecessary(players);
 		
 		// Clear hands before each game round. The hands cannot be cleared too
@@ -187,11 +127,11 @@ public class Game extends Thread {
 		
 		gameState = new GameState(players);
 		
-		logger.info("Round #: " + numRuns);
+		logger.finest("Round #: " + numRuns);
 
-		logger.fine("\nStarting new game!");
-		logger.fine(player1.getName() + " has $" + player1.getBankroll());
-		logger.fine(player2.getName() + " has $" + player2.getBankroll());
+		logger.finest("\nStarting new game!");
+		logger.finest(player1.getName() + " has $" + player1.getBankroll());
+		logger.finest(player2.getName() + " has $" + player2.getBankroll());
 		
 		//Need a boolean to decide to continue game.  This is set to false whenever somebody folds.
 		boolean continueGame = true;
@@ -250,7 +190,8 @@ public class Game extends Thread {
 			} else {
 				processWinner(player2, player1);
 			}
-		}		
+		}
+		
 	}
 	
 	/**
@@ -261,7 +202,7 @@ public class Game extends Thread {
 	 * <li>P1 Checks -> P2 Bets -> P1 Raises -> ... keep raises until somebody
 	 * Calls -> End</li>
 	 * <li>P1 Bets -> P2 Calls -> End</li>
-	 * <li>P1 Bets -> P2 Raises -> P1 Raises -> ... keep rasing until somebody
+	 * <li>P1 Bets -> P2 Raises -> P1 Raises -> ... keep raisng until somebody
 	 * Calls -> End</li>
 	 * <li>P1 or P2 Folding at any time leads to an end</li>
 	 * </ul>
@@ -329,6 +270,7 @@ public class Game extends Thread {
 	 */
 	private Boolean processAction(AbstractPlayer player1, AbstractPlayer player2, int phase) throws ApplicationException {
 		PlayerAction action1 = player1.getAction(gameState);
+
 		if (action1.getActionType() == ActionType.FOLD) {
 			gameState.addPlayerActivityRecord(new PlayerActivityRecord(player1, numRuns, phase, action1));
 			processWinner(player2, player1);
@@ -402,8 +344,8 @@ public class Game extends Thread {
 		gameState.addPlayerActivityRecord(new PlayerActivityRecord(loser, numRuns, BettingRound.SHOWDOWN, ResultState.LOSE));
 		winner.adjustBankroll(loser.getPot());
 		loser.adjustBankroll(-1 * loser.getPot());
-		winner.processEndOfGame(ResultState.WIN);
-		loser.processEndOfGame(ResultState.LOSE);
+		winner.processEndOfRound(ResultState.WIN);
+		loser.processEndOfRound(ResultState.LOSE);
 	}
 	
 	/**
@@ -412,7 +354,7 @@ public class Game extends Thread {
 	 */
 	private void processTie(List<AbstractPlayer> players) {
 		for(AbstractPlayer p : players) {
-			p.processEndOfGame(ResultState.TIE);
+			p.processEndOfRound(ResultState.TIE);
 			gameState.addPlayerActivityRecord(new PlayerActivityRecord(p, numRuns, BettingRound.SHOWDOWN, ResultState.TIE));
 		}		
 	}
@@ -424,13 +366,13 @@ public class Game extends Thread {
 	 * @param player2
 	 */
 	private static void printTableState(AbstractPlayer player1, AbstractPlayer player2) {
-		logger.fine("Table has: " + getCardListString(player2.getHand().getTableCards()));
-		logger.fine(player1.getName() + " has: " + player1.toString());
-		logger.fine(player2.getName() + " has: " + player2.toString());
+		logger.finest("Table has: " + getCardListString(player2.getHand().getTableCards()));
+		logger.finest(player1.getName() + " has: " + player1.toString());
+		logger.finest(player2.getName() + " has: " + player2.toString());
 	}
 
 	/**
-	 * Prints out a list of cards
+	 * Returns a string for a list of cards
 	 * @param cards
 	 * @return
 	 */
@@ -443,48 +385,6 @@ public class Game extends Thread {
 	}
 	
 	/**
-	 * Serializes a ReinforcementLearnerPlayer
-	 * @param players
-	 * @throws ApplicationException
-	 */
-	private static void serializePlayers(List<AbstractPlayer> players) throws ApplicationException {
-		try {
-			for (AbstractPlayer player : players) {
-				if (player instanceof Serializable) {
-					ObjectOutputStream os = new ObjectOutputStream(
-							new FileOutputStream(player.getName()));
-					os.writeObject(player);
-					os.close();
-				}
-			}
-		} catch (IOException e) {
-			throw new ApplicationException(e);
-		}
-	}
-	
-	/**
-	 * Deserializes an AbstractPlayer
-	 * @param name
-	 * @return
-	 * @throws ApplicationException
-	 */
-	private static AbstractPlayer deserializePlayer(String name) throws ApplicationException {
-		ObjectInput input = null;
-		try {
-	      InputStream file = new FileInputStream(name);
-	      InputStream buffer = new BufferedInputStream(file);
-	      input = new ObjectInputStream ( buffer );
-	      AbstractPlayer player = (AbstractPlayer) input.readObject();
-	      logger.info("Restored player: " + name);
-	      return player;
-		} catch(IOException e) {
-			throw new ApplicationException(e);
-		} catch(ClassNotFoundException e) {
-			throw new ApplicationException(e);
-		}		
-	}
-
-	/**
 	 * Returns game state
 	 * @return
 	 */
@@ -492,6 +392,11 @@ public class Game extends Thread {
 		return gameState;
 	}
 	
+	/**
+	 * Resets the bankroll if necessary.  If a player gets negative money, then each player's
+	 * bankroll is reset to the default value.  
+	 * @param players
+	 */
 	private void resetPlayerBankrollIfNecessary(List<AbstractPlayer> players) {
 		for(AbstractPlayer p : players) {
 			if(p.getBankroll() <= 0) {
@@ -502,4 +407,30 @@ public class Game extends Thread {
 			}
 		}
 	}
+	
+
+	public static AbstractPlayer generatePlayer(String className,
+			String playerName) throws ApplicationException {
+		try {
+			Class object = Class.forName(className);
+			Constructor c = object.getConstructor(new Class[] { String.class });
+			return (AbstractPlayer) c.newInstance(new Object[] {playerName});
+		} catch (ClassNotFoundException e) {
+			throw new ApplicationException(e);
+		} catch (NoSuchMethodException e) {
+			throw new ApplicationException(e);
+		} catch (IllegalAccessException e) {
+			throw new ApplicationException(e);
+		} catch (InstantiationException e) {
+			throw new ApplicationException(e);
+		} catch (InvocationTargetException e) {
+			throw new ApplicationException(e);
+		}
+	}
+
+	public long getLastActivityTime() {
+		return lastActivityTime;
+	}
+
+
 }

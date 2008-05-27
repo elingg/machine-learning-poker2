@@ -5,8 +5,8 @@ import java.util.logging.Logger;
 
 /**
  * This is a base class that represents a player. All players (e.g. HumanPlayer,
- * ReinforcementLearningPlayer, etc.) should extend this class. The game engine
- * calls these funcitons directly.
+ * ReinforcementLearningPlayer, WebPlayer etc.) should extend this class. The game 
+ * engine calls these funcitons directly.
  * 
  * There are several "hooks" that your player can have into the game engine. The
  * ones you will probably want to use are:
@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * <li></li>
  * </ul>
  * 
- * @author ago
+ * @author alecmgo@gmail.com
  * 
  */
 public abstract class AbstractPlayer implements Serializable {
@@ -187,9 +187,8 @@ public abstract class AbstractPlayer implements Serializable {
 	/**
 	 * Called after a game round ends
 	 * @param resultState
-	 * TODO:  Rename this to "processEndOfRound"
 	 */
-	public void processEndOfGame(int resultState) {
+	public void processEndOfRound(int resultState) {
 		pot = 0;
 	}
 

@@ -21,10 +21,13 @@ public class Util {
 	 */
 	private Util() {}
 
-	public static int findHighCardValue(List<Card> cardList)
-	{		
-		if(cardList!=null && cardList.size() > 0)
-		{
+	/**
+	 * Returns the card with the highest value.
+	 * @param cardList
+	 * @return
+	 */
+	public static int findHighCardValue(List<Card> cardList) {		
+		if(cardList!=null && cardList.size() > 0) {
 			Collections.sort(cardList);
 			return cardList.get(cardList.size()-1).getValue();
 		}

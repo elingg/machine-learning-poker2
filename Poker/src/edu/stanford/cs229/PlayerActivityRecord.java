@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  * <li>Displaying information in the web application and on the command-line</li>
  * <li>To log to a history file</li>
  * </ul>
- * @author ago
+ * @author alecmgo@gmail.com
  *
  */
 public class PlayerActivityRecord {

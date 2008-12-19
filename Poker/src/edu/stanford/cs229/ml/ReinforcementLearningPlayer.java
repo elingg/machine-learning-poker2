@@ -156,7 +156,7 @@ public class ReinforcementLearningPlayer extends AbstractPlayer implements Seria
 		} else {
 			exp=findExpectedValue(handVal,ht, this.getPot(), totalPot);
 
-			if(opponentBet > 99 && exp < .7) //fold if opponent bet is too high
+			if(opponentBet > 99 && exp < .6 && fuzzy > .1 ) //fold if opponent bet is too high
 				return new PlayerAction(ActionType.FOLD, 0);
 		}
 		
